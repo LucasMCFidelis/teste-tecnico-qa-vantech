@@ -9,4 +9,7 @@ export default {
     ...tsJestTransformCfg,
   },
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 }
