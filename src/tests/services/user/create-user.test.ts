@@ -7,7 +7,7 @@ import { createUserSchema } from '../../../schemas/user.schema'
 import type { CreateUserInput } from '../../../schemas/user.schema'
 import type { User } from '../../../generated/prisma/client'
 import { InternalServerError } from '../../../utils/errors/httpErrors'
-import { buildEmailWithLength, makeUser } from './user.fixtures'
+import { buildEmailWithLength, makeCreatedUser, makePrismaUser, makeUser } from './user.fixtures'
 import { prisma } from '../../../lib/prisma'
 
 jest.mock('../../../lib/prisma', () => ({
@@ -43,7 +43,7 @@ describe('UserService.createUser', () => {
 
   describe('Validação do schema', () => {
     it('deve validar os dados exatamente uma vez', async () => {
-      mockedCreate.mockResolvedValueOnce({} as User)
+      mockedCreate.mockResolvedValueOnce(makePrismaUser())
 
       await userService.createUser(makeUser())
 
@@ -127,7 +127,7 @@ describe('UserService.createUser', () => {
   describe('Boundary Value Analysis', () => {
     describe('name', () => {
       it('aceita 2 caracteres (limite mínimo)', async () => {
-        const createdUser = {} as User
+        const createdUser = makePrismaUser()
         mockedCreate.mockResolvedValueOnce(createdUser)
 
         await expect(
@@ -136,11 +136,11 @@ describe('UserService.createUser', () => {
               name: 'ab',
             }),
           ),
-        ).resolves.toEqual(createdUser)
+        ).resolves.toEqual(makeCreatedUser(createdUser))
       })
 
       it('aceita 100 caracteres (limite máximo)', async () => {
-        const createdUser = {} as User
+        const createdUser = makePrismaUser()
         mockedCreate.mockResolvedValueOnce(createdUser)
 
         await expect(
@@ -149,7 +149,7 @@ describe('UserService.createUser', () => {
               name: 'a'.repeat(100),
             }),
           ),
-        ).resolves.toEqual(createdUser)
+        ).resolves.toEqual(makeCreatedUser(createdUser))
       })
 
       it('rejeita 101 caracteres (acima do máximo)', async () => {
@@ -167,7 +167,7 @@ describe('UserService.createUser', () => {
 
     describe('email', () => {
       it('aceita 150 caracteres (limite máximo)', async () => {
-        const createdUser = {} as User
+        const createdUser = makePrismaUser()
         mockedCreate.mockResolvedValueOnce(createdUser)
 
         await expect(
@@ -176,7 +176,7 @@ describe('UserService.createUser', () => {
               email: buildEmailWithLength(150),
             }),
           ),
-        ).resolves.toEqual(createdUser)
+        ).resolves.toEqual(makeCreatedUser(createdUser))
       })
 
       it('rejeita 151 caracteres (acima do máximo)', async () => {
@@ -194,7 +194,7 @@ describe('UserService.createUser', () => {
 
     describe('password', () => {
       it('aceita 8 caracteres (limite mínimo)', async () => {
-        const createdUser = {} as User
+        const createdUser = makePrismaUser()
         mockedCreate.mockResolvedValueOnce(createdUser)
 
         await expect(
@@ -203,11 +203,11 @@ describe('UserService.createUser', () => {
               password: '12345678',
             }),
           ),
-        ).resolves.toEqual(createdUser)
+        ).resolves.toEqual(makeCreatedUser(createdUser))
       })
 
       it('aceita 72 caracteres (limite máximo)', async () => {
-        const createdUser = {} as User
+        const createdUser = makePrismaUser()
         mockedCreate.mockResolvedValueOnce(createdUser)
 
         await expect(
@@ -216,7 +216,7 @@ describe('UserService.createUser', () => {
               password: 'a'.repeat(72),
             }),
           ),
-        ).resolves.toEqual(createdUser)
+        ).resolves.toEqual(makeCreatedUser(createdUser))
       })
 
       it('rejeita 73 caracteres (acima do máximo)', async () => {
@@ -284,7 +284,7 @@ describe('UserService.createUser', () => {
     it('deve prosseguir para criação quando não existir usuário com o e-mail informado', async () => {
       mockedFindUnique.mockResolvedValueOnce(null)
 
-      mockedCreate.mockResolvedValueOnce({} as User)
+      mockedCreate.mockResolvedValueOnce(makePrismaUser())
 
       await userService.createUser(makeUser())
 
@@ -308,17 +308,20 @@ describe('UserService.createUser', () => {
     it('retorna o usuário criado e envia os dados corretamente ao Prisma', async () => {
       const userData = makeUser()
 
-      const createdUser: User = {
+      const createdUser = makePrismaUser({
         id: 1,
         createdAt: new Date(),
         ...userData,
-      }
+      })
 
       mockedCreate.mockResolvedValueOnce(createdUser)
 
       const result = await userService.createUser(userData)
 
-      expect(result).toEqual(createdUser)
+      expect(result).toEqual({
+        ...createdUser,
+        createdAt: createdUser.createdAt.toISOString(),
+      })
 
       expect(mockedCreate).toHaveBeenCalledTimes(1)
 
