@@ -14,11 +14,15 @@ jest.mock('../../../lib/prisma', () => ({
   prisma: {
     user: {
       create: jest.fn(),
+      findUnique: jest.fn(),
     },
   },
 }))
 
 const mockedCreate = prisma.user.create as jest.MockedFunction<typeof prisma.user.create>
+const mockedFindUnique = prisma.user.findUnique as jest.MockedFunction<
+  typeof prisma.user.findUnique
+>
 
 describe('UserService.createUser', () => {
   let parseSpy: ReturnType<typeof jest.spyOn>
@@ -28,6 +32,9 @@ describe('UserService.createUser', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined)
 
     mockedCreate.mockReset()
+    mockedFindUnique.mockReset()
+
+    mockedFindUnique.mockResolvedValue(null)
   })
 
   afterEach(() => {
@@ -251,6 +258,42 @@ describe('UserService.createUser', () => {
     })
   })
 
+  describe('Validação de usuário existente', () => {
+    it('deve lançar ConflictError quando já existir um usuário com o e-mail informado', async () => {
+      mockedFindUnique.mockResolvedValueOnce({
+        id: 1,
+        createdAt: new Date(),
+        ...makeUser(),
+      } as User)
+
+      await expect(userService.createUser(makeUser())).rejects.toThrow(
+        'Não é possível criar um usuário com este e-mail',
+      )
+
+      expect(mockedFindUnique).toHaveBeenCalledTimes(1)
+
+      expect(mockedFindUnique).toHaveBeenCalledWith({
+        where: {
+          email: makeUser().email,
+        },
+      })
+
+      expect(mockedCreate).not.toHaveBeenCalled()
+    })
+
+    it('deve prosseguir para criação quando não existir usuário com o e-mail informado', async () => {
+      mockedFindUnique.mockResolvedValueOnce(null)
+
+      mockedCreate.mockResolvedValueOnce({} as User)
+
+      await userService.createUser(makeUser())
+
+      expect(mockedFindUnique).toHaveBeenCalledTimes(1)
+
+      expect(mockedCreate).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('Caminho feliz', () => {
     it('retorna o usuário criado e envia os dados corretamente ao Prisma', async () => {
       const userData = makeUser()
@@ -271,6 +314,13 @@ describe('UserService.createUser', () => {
 
       expect(mockedCreate).toHaveBeenCalledWith({
         data: userData,
+      })
+
+      expect(mockedFindUnique).toHaveBeenCalledTimes(1)
+      expect(mockedFindUnique).toHaveBeenCalledWith({
+        where: {
+          email: userData.email,
+        },
       })
     })
   })

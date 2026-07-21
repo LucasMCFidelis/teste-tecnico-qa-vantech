@@ -1,11 +1,16 @@
 import type { User } from '../generated/prisma/client'
 import { prisma } from '../lib/prisma'
 import { createUserSchema, type CreateUserInput } from '../schemas/user.schema'
-import { InternalServerError } from '../utils/errors/httpErrors'
+import { ConflictError, InternalServerError } from '../utils/errors/httpErrors'
 
 class UserService {
   async createUser(userData: CreateUserInput): Promise<User | void> {
     createUserSchema.parse(userData)
+
+    const existingUser = await this.getUserByEmail(userData.email)
+    if (existingUser) {
+      throw new ConflictError('Não é possível criar um usuário com este e-mail')
+    }
 
     try {
       const createdUser = await prisma.user.create({ data: userData })

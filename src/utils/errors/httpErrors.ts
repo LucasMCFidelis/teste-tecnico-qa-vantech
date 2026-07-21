@@ -16,6 +16,15 @@ export class NotFoundError extends Error {
   }
 }
 
+export class ConflictError extends Error {
+  statusCode = 409
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'ConflictError'
+  }
+}
+
 export class InternalServerError extends Error {
   statusCode = 500
 
