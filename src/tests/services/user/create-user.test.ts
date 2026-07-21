@@ -292,6 +292,16 @@ describe('UserService.createUser', () => {
 
       expect(mockedCreate).toHaveBeenCalledTimes(1)
     })
+
+    it('deve interromper a criação quando ocorrer erro ao buscar usuário existente', async () => {
+      mockedFindUnique.mockRejectedValueOnce(
+        new InternalServerError('Erro interno ao buscar usuário no banco de dados por e-mail'),
+      )
+
+      await expect(userService.createUser(makeUser())).rejects.toBeInstanceOf(InternalServerError)
+
+      expect(mockedCreate).not.toHaveBeenCalled()
+    })
   })
 
   describe('Caminho feliz', () => {
