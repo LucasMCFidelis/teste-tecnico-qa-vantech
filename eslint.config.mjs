@@ -41,6 +41,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'eslint.config.mjs', 'prisma.config.ts', 'generated/**'],
+    ignores: ['dist/', 'node_modules/', 'eslint.config.mjs', 'prisma.config.ts', 'src/generated/**'],
   },
 )
