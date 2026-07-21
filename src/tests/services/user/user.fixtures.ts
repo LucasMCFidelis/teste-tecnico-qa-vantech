@@ -17,10 +17,11 @@ export const makePrismaUser = (overrides?: Partial<User>): User => ({
   ...overrides,
 })
 
-export const makeCreatedUser = (prismaUser: User): CreatedUserResponse => ({
-  ...prismaUser,
-  createdAt: prismaUser.createdAt.toISOString(),
-})
+export const makeCreatedUser = (prismaUser: User): CreatedUserResponse => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...rest } = prismaUser
+  return { ...rest, createdAt: prismaUser.createdAt.toISOString() }
+}
 
 export const buildEmailWithLength = (length: number): string => {
   const domain = '@ex.com'

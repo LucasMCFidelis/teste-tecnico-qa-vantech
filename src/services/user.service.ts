@@ -15,7 +15,12 @@ class UserService {
 
     try {
       const createdUser = await prisma.user.create({ data: userData })
-      return { ...createdUser, createdAt: createdUser.createdAt.toISOString() }
+      return {
+        id: createdUser.id,
+        name: createdUser.name,
+        email: createdUser.email,
+        createdAt: createdUser.createdAt.toISOString(),
+      }
     } catch (error) {
       console.error('Error creating user:', error)
       throw new InternalServerError('Erro interno ao criar usuário no banco de dados')

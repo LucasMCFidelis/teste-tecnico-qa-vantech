@@ -318,11 +318,8 @@ describe('UserService.createUser', () => {
 
       const result = await userService.createUser(userData)
 
-      expect(result).toEqual({
-        ...createdUser,
-        createdAt: createdUser.createdAt.toISOString(),
-      })
-
+      expect(result).toEqual(makeCreatedUser(createdUser))
+      expect(result).not.toHaveProperty('password')
       expect(mockedCreate).toHaveBeenCalledTimes(1)
 
       expect(mockedCreate).toHaveBeenCalledWith({
