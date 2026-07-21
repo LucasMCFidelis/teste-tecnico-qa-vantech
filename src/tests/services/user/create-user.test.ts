@@ -9,6 +9,7 @@ import type { User } from '../../../generated/prisma/client'
 import { InternalServerError } from '../../../utils/errors/httpErrors'
 import { buildEmailWithLength, makeCreatedUser, makePrismaUser, makeUser } from './user.fixtures'
 import { prisma } from '../../../lib/prisma'
+import { hashPassword } from '../../../utils/security/hash-password'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -18,11 +19,15 @@ jest.mock('../../../lib/prisma', () => ({
     },
   },
 }))
+jest.mock('../../../utils/security/hash-password', () => ({
+  hashPassword: jest.fn(),
+}))
 
 const mockedCreate = prisma.user.create as jest.MockedFunction<typeof prisma.user.create>
 const mockedFindUnique = prisma.user.findUnique as jest.MockedFunction<
   typeof prisma.user.findUnique
 >
+const mockedHashPassword = hashPassword as jest.MockedFunction<typeof hashPassword>
 
 describe('UserService.createUser', () => {
   let parseSpy: ReturnType<typeof jest.spyOn>
@@ -35,10 +40,12 @@ describe('UserService.createUser', () => {
     mockedFindUnique.mockReset()
 
     mockedFindUnique.mockResolvedValue(null)
+    mockedHashPassword.mockResolvedValue('hashed-password')
   })
 
   afterEach(() => {
     jest.restoreAllMocks()
+    mockedHashPassword.mockReset()
   })
 
   describe('Validação do schema', () => {
@@ -304,6 +311,18 @@ describe('UserService.createUser', () => {
     })
   })
 
+  describe('Validação criptografia da senha', () => {
+    it('deve interromper a criação quando ocorrer erro ao realizar criptografia da senha', async () => {
+      mockedHashPassword.mockRejectedValueOnce(
+        new InternalServerError('Erro interno ao criptografar senha'),
+      )
+
+      await expect(userService.createUser(makeUser())).rejects.toBeInstanceOf(InternalServerError)
+
+      expect(mockedCreate).not.toHaveBeenCalled()
+    })
+  })
+
   describe('Caminho feliz', () => {
     it('retorna o usuário criado e envia os dados corretamente ao Prisma', async () => {
       const userData = makeUser()
@@ -320,10 +339,16 @@ describe('UserService.createUser', () => {
 
       expect(result).toEqual(makeCreatedUser(createdUser))
       expect(result).not.toHaveProperty('password')
-      expect(mockedCreate).toHaveBeenCalledTimes(1)
 
+      expect(mockedHashPassword).toHaveBeenCalledTimes(1)
+      expect(mockedHashPassword).toHaveBeenCalledWith(userData.password)
+
+      expect(mockedCreate).toHaveBeenCalledTimes(1)
       expect(mockedCreate).toHaveBeenCalledWith({
-        data: userData,
+        data: {
+          ...userData,
+          password: 'hashed-password',
+        },
       })
 
       expect(mockedFindUnique).toHaveBeenCalledTimes(1)

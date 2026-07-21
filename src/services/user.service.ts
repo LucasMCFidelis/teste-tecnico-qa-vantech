@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma'
 import type { CreatedUserResponse } from '../schemas/user.schema'
 import { createUserSchema, type CreateUserInput } from '../schemas/user.schema'
 import { ConflictError, InternalServerError } from '../utils/errors/httpErrors'
+import { hashPassword } from '../utils/security/hash-password'
 
 class UserService {
   async createUser(userData: CreateUserInput): Promise<CreatedUserResponse | void> {
@@ -14,7 +15,13 @@ class UserService {
     }
 
     try {
-      const createdUser = await prisma.user.create({ data: userData })
+      const passwordHash = await hashPassword(userData.password)
+      const createdUser = await prisma.user.create({
+        data: {
+          ...userData,
+          password: passwordHash,
+        },
+      })
       return {
         id: createdUser.id,
         name: createdUser.name,
