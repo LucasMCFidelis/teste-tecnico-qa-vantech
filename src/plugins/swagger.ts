@@ -2,7 +2,7 @@ import fp from 'fastify-plugin'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import type { FastifyInstance } from 'fastify'
-import { swaggerTags } from '../utils/swagger.tags'
+import { swaggerTags } from '../utils/swagger.tags.js'
 import { jsonSchemaTransform } from 'fastify-type-provider-zod'
 
 async function swaggerPlugin(app: FastifyInstance) {

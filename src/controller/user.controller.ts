@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { handleError } from '../utils/errors/handleError'
-import type { CreateUserInput } from '../schemas/user.schema'
-import { userService } from '../services/user.service'
+import { handleError } from '../utils/errors/handleError.js'
+import type { CreateUserInput } from '../schemas/user.schema.js'
+import { userService } from '../services/user.service.js'
 
 class UserController {
   async createUser(
