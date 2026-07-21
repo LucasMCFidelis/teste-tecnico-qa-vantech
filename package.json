@@ -2,7 +2,11 @@
   "name": "teste-tecnico-qa-vantech",
   "version": "1.0.0",
   "description": "Teste técnico realizado para vaga de Analista de teste na Vantech",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "test": "jest --watchAll --no-warnings",
     "dev": "tsx --watch --no-warnings src/index.ts",
@@ -11,7 +15,11 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "repository": {
     "type": "git",
