@@ -95,4 +95,6 @@ bower_components/
 
 # Arquivos de cache de texto simples
 *.cache
-/generated/prisma
+src/generated/prisma
+
+*.db

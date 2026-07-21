@@ -1,0 +1,50 @@
+import type { User } from '../generated/prisma/client'
+import { prisma } from '../lib/prisma'
+import type { CreatedUserResponse } from '../schemas/user.schema'
+import { createUserSchema, type CreateUserInput } from '../schemas/user.schema'
+import { ConflictError, InternalServerError } from '../utils/errors/httpErrors'
+import { hashPassword } from '../utils/security/hash-password'
+
+class UserService {
+  async createUser(userData: CreateUserInput): Promise<CreatedUserResponse | void> {
+    createUserSchema.parse(userData)
+
+    const existingUser = await this.getUserByEmail(userData.email)
+    if (existingUser) {
+      throw new ConflictError('Não é possível criar um usuário com este e-mail')
+    }
+
+    try {
+      const passwordHash = await hashPassword(userData.password)
+      const createdUser = await prisma.user.create({
+        data: {
+          ...userData,
+          password: passwordHash,
+        },
+      })
+      return {
+        id: createdUser.id,
+        name: createdUser.name,
+        email: createdUser.email,
+        createdAt: createdUser.createdAt.toISOString(),
+      }
+    } catch (error) {
+      console.error('Error creating user:', error)
+      throw new InternalServerError('Erro interno ao criar usuário no banco de dados')
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+      })
+      return user
+    } catch (error) {
+      console.error('Error to find user:', error)
+      throw new InternalServerError('Erro interno ao buscar usuário no banco de dados por e-mail')
+    }
+  }
+}
+
+export const userService = new UserService()
