@@ -1,19 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { swaggerTags } from '../utils/swagger.tags'
-
-const healthResponseSchema = {
-  200: {
-    description: 'API e banco de dados operacionais',
-    type: 'object',
-    properties: {
-      status: { type: 'string', example: 'ok' },
-      timestamp: { type: 'string', format: 'date-time' },
-      services: {
-        type: 'object',
-      },
-    },
-  },
-}
+import { healthSchema } from '../schemas/health.schema'
 
 export default async function healthRoutes(app: FastifyInstance) {
   app.get('/', {
@@ -21,7 +8,9 @@ export default async function healthRoutes(app: FastifyInstance) {
       tags: [swaggerTags.health.name],
       summary: 'Verifica o status da API',
       description: 'Retorna o status da API e a conectividade com o banco de dados',
-      response: healthResponseSchema,
+      response: {
+        200: healthSchema,
+      },
     },
     handler: async (_, reply) => {
       return reply.status(200).send({

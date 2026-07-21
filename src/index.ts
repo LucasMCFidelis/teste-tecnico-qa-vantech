@@ -3,8 +3,13 @@ import 'dotenv/config'
 import cors from '@fastify/cors'
 import swaggerPlugin from './plugins/swagger'
 import healthRoutes from './routes/health'
+import userRoutes from './routes/user.routes'
+import { validatorCompiler, serializerCompiler } from 'fastify-type-provider-zod'
 
 const server = fastify({ logger: true })
+
+server.setValidatorCompiler(validatorCompiler)
+server.setSerializerCompiler(serializerCompiler)
 
 server.register(cors, {
   origin: process.env.CORS_ORIGIN || '*',
@@ -16,6 +21,7 @@ server.get('/', (_, reply) => reply.redirect('/api/v1/docs'))
 server.register(
   async (api) => {
     api.register(healthRoutes, { prefix: '/health' })
+    api.register(userRoutes, { prefix: '/users' })
   },
   { prefix: '/api/v1' },
 )

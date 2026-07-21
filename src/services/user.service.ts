@@ -1,10 +1,11 @@
 import type { User } from '../generated/prisma/client'
 import { prisma } from '../lib/prisma'
+import type { CreatedUserResponse } from '../schemas/user.schema'
 import { createUserSchema, type CreateUserInput } from '../schemas/user.schema'
 import { ConflictError, InternalServerError } from '../utils/errors/httpErrors'
 
 class UserService {
-  async createUser(userData: CreateUserInput): Promise<User | void> {
+  async createUser(userData: CreateUserInput): Promise<CreatedUserResponse | void> {
     createUserSchema.parse(userData)
 
     const existingUser = await this.getUserByEmail(userData.email)
@@ -14,7 +15,7 @@ class UserService {
 
     try {
       const createdUser = await prisma.user.create({ data: userData })
-      return createdUser
+      return { ...createdUser, createdAt: createdUser.createdAt.toISOString() }
     } catch (error) {
       console.error('Error creating user:', error)
       throw new InternalServerError('Erro interno ao criar usuário no banco de dados')
