@@ -1,14 +1,16 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
 import { z } from 'zod'
 
-import { userService } from '../../services/user.service'
-import { prisma } from '../../lib/prisma'
-import { createUserSchema } from '../../schemas/user.schema'
-import type { CreateUserInput } from '../../schemas/user.schema'
-import type { User } from '../../generated/prisma/client'
-import { InternalServerError } from '../../utils/errors/httpErrors'
+import { userService } from '../../../services/user.service'
 
-jest.mock('../../lib/prisma', () => ({
+import { createUserSchema } from '../../../schemas/user.schema'
+import type { CreateUserInput } from '../../../schemas/user.schema'
+import type { User } from '../../../generated/prisma/client'
+import { InternalServerError } from '../../../utils/errors/httpErrors'
+import { buildEmailWithLength, makeUser } from './user.fixtures'
+import { prisma } from '../../../lib/prisma'
+
+jest.mock('../../../lib/prisma', () => ({
   prisma: {
     user: {
       create: jest.fn(),
@@ -17,17 +19,6 @@ jest.mock('../../lib/prisma', () => ({
 }))
 
 const mockedCreate = prisma.user.create as jest.MockedFunction<typeof prisma.user.create>
-
-const makeUser = (overrides: Partial<CreateUserInput> = {}): CreateUserInput => ({
-  name: 'Lucas Fidelis',
-  email: 'lucas@example.com',
-  password: 'senha-forte-123',
-  ...overrides,
-})
-function buildEmailWithLength(length: number): string {
-  const domain = '@ex.com'
-  return 'a'.repeat(length - domain.length) + domain
-}
 
 describe('UserService.createUser', () => {
   let parseSpy: ReturnType<typeof jest.spyOn>

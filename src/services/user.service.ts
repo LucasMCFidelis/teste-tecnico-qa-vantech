@@ -15,6 +15,18 @@ class UserService {
       throw new InternalServerError('Erro interno ao criar usuário no banco de dados')
     }
   }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+      })
+      return user
+    } catch (error) {
+      console.error('Error to find user:', error)
+      throw new InternalServerError('Erro interno ao buscar usuário no banco de dados por e-mail')
+    }
+  }
 }
 
 export const userService = new UserService()
