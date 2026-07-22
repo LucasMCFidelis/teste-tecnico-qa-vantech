@@ -7,6 +7,15 @@ export class BadRequestError extends Error {
   }
 }
 
+export class UnauthorizedError extends Error {
+  statusCode = 401
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'UnauthorizedError'
+  }
+}
+
 export class NotFoundError extends Error {
   statusCode = 404
 

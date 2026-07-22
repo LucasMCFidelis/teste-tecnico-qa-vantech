@@ -7,8 +7,13 @@ import {
   type LoggedUserResponse,
   type LoginUserInput,
 } from '../schemas/auth.schema.js'
-import { InternalServerError, NotFoundError } from '../utils/errors/httpErrors.js'
+import {
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../utils/errors/httpErrors.js'
 import { userService } from './user.service.js'
+import { comparePasswords } from '../utils/security/compare-passwords.js'
 
 class AuthService {
   generateToken(): string {
@@ -56,6 +61,11 @@ class AuthService {
     const user = await userService.getUserByEmail(userCredentials.email)
     if (!user) {
       throw new NotFoundError('Usuário não encontrado')
+    }
+
+    const isPasswordValid = await comparePasswords(userCredentials.password, user.password)
+    if (!isPasswordValid) {
+      throw new UnauthorizedError('Credenciais inválidas')
     }
 
     const token = this.generateToken()
