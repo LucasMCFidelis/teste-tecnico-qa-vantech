@@ -75,6 +75,7 @@ report/
 *.run.xml
 *.bcf
 *.d.ts
+!src/types/fastify.d.ts
 
 # Bower
 bower_components/
