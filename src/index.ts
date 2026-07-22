@@ -5,6 +5,7 @@ import swaggerPlugin from './plugins/swagger.js'
 import healthRoutes from './routes/health.js'
 import userRoutes from './routes/user.routes.js'
 import { validatorCompiler, serializerCompiler } from 'fastify-type-provider-zod'
+import authRoutes from './routes/auth.routes.js'
 
 const server = fastify({ logger: true })
 
@@ -22,6 +23,7 @@ server.register(
   async (api) => {
     api.register(healthRoutes, { prefix: '/health' })
     api.register(userRoutes, { prefix: '/users' })
+    api.register(authRoutes, { prefix: '/auth' })
   },
   { prefix: '/api/v1' },
 )
