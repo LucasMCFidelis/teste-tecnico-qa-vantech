@@ -2,7 +2,7 @@ import { describe, it, expect, jest } from '@jest/globals'
 import { authService } from '../../../services/auth.service.js'
 import { prisma } from '../../../lib/prisma.js'
 import { makePrismaSession } from './auth.fixtures.js'
-import { GoneError } from '../../../utils/errors/httpErrors.js'
+import { GoneError, UnauthorizedError } from '../../../utils/errors/httpErrors.js'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -18,10 +18,10 @@ const mockedFindUnique = prisma.session.findUnique as jest.MockedFunction<
 >
 
 describe('AuthService.validateToken', () => {
-  it('deve lançar NotFoundError quando a sessão não existir', async () => {
+  it('deve lançar UnauthorizedError quando a sessão não existir', async () => {
     mockedFindUnique.mockResolvedValue(null)
 
-    await expect(authService.validateToken('token')).rejects.toThrow('Sessão não encontrada')
+    await expect(authService.validateToken('token')).rejects.toBeInstanceOf(UnauthorizedError)
   })
 
   it('deve retornar a sessão encontrada', async () => {

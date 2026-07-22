@@ -85,7 +85,7 @@ class AuthService {
     })
 
     if (!session) {
-      throw new NotFoundError('Sessão não encontrada')
+      throw new UnauthorizedError('Token inválido')
     }
 
     this.checkSessionIsValide(session.expiresAt)
