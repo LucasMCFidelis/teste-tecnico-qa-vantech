@@ -1,4 +1,3 @@
-import { createHash, randomUUID } from 'node:crypto'
 import { prisma } from '../lib/prisma.js'
 import type { SessionResponse } from '../schemas/auth.schema.js'
 import {
@@ -13,20 +12,13 @@ import {
   UnauthorizedError,
 } from '../utils/errors/httpErrors.js'
 import { userService } from './user.service.js'
-import { comparePasswords } from '../utils/security/compare-passwords.js'
+import { generateToken, hashToken } from '../utils/security/token.js'
+import { comparePasswords } from '../utils/security/password.js'
 
 class AuthService {
-  generateToken(): string {
-    return randomUUID()
-  }
-
   private getNewExpiresAtDate(): Date {
     const DEFAULT_SESSION_TIME_MILLISECONDS = 3600000 // 60 minutos
     return new Date(Date.now() + DEFAULT_SESSION_TIME_MILLISECONDS)
-  }
-
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex')
   }
 
   async createSession(userId: number, token: string): Promise<SessionResponse> {
@@ -68,7 +60,7 @@ class AuthService {
       throw new UnauthorizedError('Credenciais inválidas')
     }
 
-    const token = this.generateToken()
+    const token = generateToken()
 
     await this.createSession(user.id, token)
 
@@ -76,7 +68,7 @@ class AuthService {
   }
 
   async validateToken(token: string): Promise<SessionResponse | null> {
-    const hashedToken = this.hashToken(token)
+    const hashedToken = hashToken(token)
 
     const session = await prisma.session.findUnique({
       where: {
