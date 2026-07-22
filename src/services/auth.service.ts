@@ -7,6 +7,7 @@ import {
   type LoginUserInput,
 } from '../schemas/auth.schema.js'
 import {
+  GoneError,
   InternalServerError,
   NotFoundError,
   UnauthorizedError,
@@ -19,6 +20,13 @@ class AuthService {
   private getNewExpiresAtDate(): Date {
     const DEFAULT_SESSION_TIME_MILLISECONDS = 3600000 // 60 minutos
     return new Date(Date.now() + DEFAULT_SESSION_TIME_MILLISECONDS)
+  }
+
+  private checkSessionIsValide(expiresAt: Date): void {
+    if (!expiresAt) return
+    if (new Date() > expiresAt) {
+      throw new GoneError('Essa sessão não está mais disponível. Realize login novamente')
+    }
   }
 
   async createSession(userId: number, token: string): Promise<SessionResponse> {
@@ -79,6 +87,8 @@ class AuthService {
     if (!session) {
       throw new NotFoundError('Sessão não encontrada')
     }
+
+    this.checkSessionIsValide(session.expiresAt)
 
     return {
       id: session.id,

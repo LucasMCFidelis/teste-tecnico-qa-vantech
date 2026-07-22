@@ -17,8 +17,8 @@ export function makePrismaSession(override: Partial<Session> = {}): Session {
     id: 1,
     userId: 1,
     token: 'token-hash',
-    createdAt: new Date('2026-07-21T10:00:00Z'),
-    expiresAt: new Date('2026-07-21T11:00:00Z'),
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     ...override,
   }
 }
