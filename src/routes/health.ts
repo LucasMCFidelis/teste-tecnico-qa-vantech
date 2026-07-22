@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
-import { swaggerTags } from '../utils/swagger.tags'
-import { healthSchema } from '../schemas/health.schema'
-import { prisma } from '../lib/prisma'
+import { swaggerTags } from '../utils/swagger.tags.js'
+import { healthSchema } from '../schemas/health.schema.js'
+import { prisma } from '../lib/prisma.js'
 
 export default async function healthRoutes(app: FastifyInstance) {
   app.get('/', {

@@ -1,5 +1,5 @@
-import type { User } from '../../../generated/prisma/client'
-import type { CreatedUserResponse, CreateUserInput } from '../../../schemas/user.schema'
+import type { User } from '../../../generated/prisma/client.js'
+import type { CreatedUserResponse, CreateUserInput } from '../../../schemas/user.schema.js'
 
 export const makeUser = (overrides: Partial<CreateUserInput> = {}): CreateUserInput => ({
   name: 'Lucas Fidelis',

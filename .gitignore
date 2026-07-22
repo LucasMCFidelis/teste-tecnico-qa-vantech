@@ -98,3 +98,5 @@ bower_components/
 src/generated/prisma
 
 *.db
+
+postman/reports/

@@ -1,6 +1,6 @@
 import type { FastifyReply } from 'fastify'
-import { BadRequestError, ConflictError, NotFoundError } from './httpErrors'
-import { sendError } from '../../routes/helpers'
+import { BadRequestError, ConflictError, NotFoundError } from './httpErrors.js'
+import { sendError } from '../../routes/helpers.js'
 
 export function handleError(reply: FastifyReply, err: unknown) {
   if (err instanceof BadRequestError) {

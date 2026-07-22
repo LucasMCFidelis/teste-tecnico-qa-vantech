@@ -1,10 +1,10 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 
-import { userService } from '../../../services/user.service'
-import type { User } from '../../../generated/prisma/client'
-import { InternalServerError } from '../../../utils/errors/httpErrors'
-import { makeUser } from './user.fixtures'
-import { prisma } from '../../../lib/prisma'
+import { userService } from '../../../services/user.service.js'
+import type { User } from '../../../generated/prisma/client.js'
+import { InternalServerError } from '../../../utils/errors/httpErrors.js'
+import { makeUser } from './user.fixtures.js'
+import { prisma } from '../../../lib/prisma.js'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {

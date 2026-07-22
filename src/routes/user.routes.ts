@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify'
-import { swaggerTags } from '../utils/swagger.tags'
-import { createdUserResponseSchema, createUserSchema } from '../schemas/user.schema'
-import { userController } from '../controller/user.controller'
-import { errorResponseSchema } from '../schemas/error.schema'
+import { swaggerTags } from '../utils/swagger.tags.js'
+import { createdUserResponseSchema, createUserSchema } from '../schemas/user.schema.js'
+import { userController } from '../controller/user.controller.js'
+import { errorResponseSchema } from '../schemas/error.schema.js'
 
 export default async function userRoutes(app: FastifyInstance) {
   app.post('/', {

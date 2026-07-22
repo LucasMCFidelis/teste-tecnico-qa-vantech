@@ -1,15 +1,15 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
 import { z } from 'zod'
 
-import { userService } from '../../../services/user.service'
+import { userService } from '../../../services/user.service.js'
 
-import { createUserSchema } from '../../../schemas/user.schema'
-import type { CreateUserInput } from '../../../schemas/user.schema'
-import type { User } from '../../../generated/prisma/client'
-import { InternalServerError } from '../../../utils/errors/httpErrors'
-import { buildEmailWithLength, makeCreatedUser, makePrismaUser, makeUser } from './user.fixtures'
-import { prisma } from '../../../lib/prisma'
-import { hashPassword } from '../../../utils/security/hash-password'
+import { createUserSchema } from '../../../schemas/user.schema.js'
+import type { CreateUserInput } from '../../../schemas/user.schema.js'
+import type { User } from '../../../generated/prisma/client.js'
+import { InternalServerError } from '../../../utils/errors/httpErrors.js'
+import { buildEmailWithLength, makeCreatedUser, makePrismaUser, makeUser } from './user.fixtures.js'
+import { prisma } from '../../../lib/prisma.js'
+import { hashPassword } from '../../../utils/security/hash-password.js'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {
