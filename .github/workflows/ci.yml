@@ -48,15 +48,27 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Install Newman
-        run: npm install -g newman
-
       - name: Run Postman tests
         run: |
           npm run start &
           npx wait-on http://localhost:3333/api/v1/health
 
-          newman run \
-            postman/vantech-test-qa-lucas-fidelis.postman_collection.json \
-            -e postman/ventech-qa-ci.postman_environment.json \
-            --reporters cli
+          npm run test:postman
+
+      - name: Upload Jest coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-coverage
+          path: coverage/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload Postman reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postman-reports
+          path: postman/reports/
+          if-no-files-found: warn
+          retention-days: 7
