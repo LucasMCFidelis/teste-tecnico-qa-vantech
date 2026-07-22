@@ -9,7 +9,7 @@ import type { User } from '../../../generated/prisma/client.js'
 import { InternalServerError } from '../../../utils/errors/httpErrors.js'
 import { buildEmailWithLength, makeCreatedUser, makePrismaUser, makeUser } from './user.fixtures.js'
 import { prisma } from '../../../lib/prisma.js'
-import { hashPassword } from '../../../utils/security/hash-password.js'
+import { hashPassword } from '../../../utils/security/password.js'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -19,7 +19,7 @@ jest.mock('../../../lib/prisma', () => ({
     },
   },
 }))
-jest.mock('../../../utils/security/hash-password', () => ({
+jest.mock('../../../utils/security/password', () => ({
   hashPassword: jest.fn(),
 }))
 
