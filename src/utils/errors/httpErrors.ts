@@ -1,53 +1,34 @@
-export class BadRequestError extends Error {
+export abstract class HttpError extends Error {
+  abstract statusCode: number
+
+  constructor(message: string) {
+    super(message)
+    this.name = new.target.name
+
+    Object.setPrototypeOf(this, new.target.prototype)
+  }
+}
+
+export class BadRequestError extends HttpError {
   statusCode = 400
-
-  constructor(message: string) {
-    super(message)
-    this.name = 'BadRequestError'
-  }
 }
 
-export class UnauthorizedError extends Error {
+export class UnauthorizedError extends HttpError {
   statusCode = 401
-
-  constructor(message: string) {
-    super(message)
-    this.name = 'UnauthorizedError'
-  }
 }
 
-export class NotFoundError extends Error {
+export class NotFoundError extends HttpError {
   statusCode = 404
-
-  constructor(message: string) {
-    super(message)
-    this.name = 'NotFoundError'
-  }
 }
 
-export class ConflictError extends Error {
+export class ConflictError extends HttpError {
   statusCode = 409
-
-  constructor(message: string) {
-    super(message)
-    this.name = 'ConflictError'
-  }
 }
 
-export class GoneError extends Error {
+export class GoneError extends HttpError {
   statusCode = 410
-
-  constructor(message: string) {
-    super(message)
-    this.name = 'GoneError'
-  }
 }
 
-export class InternalServerError extends Error {
+export class InternalServerError extends HttpError {
   statusCode = 500
-
-  constructor(message: string) {
-    super(message)
-    this.name = 'InternalServerError'
-  }
 }
