@@ -42,6 +42,8 @@ export default async function userRoutes(app: FastifyInstance) {
 
       description: 'Retorna usuário de acordo com o id',
 
+      security: [{ bearerAuth: [] }],
+
       params: getUserSchema,
 
       response: {

@@ -15,6 +15,16 @@ async function swaggerPlugin(app: FastifyInstance) {
           'Documentação da API para o projeto desenvolvido como teste técnico para a vaga de Analista de teste na Vantech. Autoria: Lucas Fidelis',
         version: '1.0.0',
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'Token',
+            description: 'Informe o token no formato Bearer <token>',
+          },
+        },
+      },
       servers: [
         {
           url: 'http://localhost:3333',
