@@ -20,6 +20,7 @@ class UserService {
       const createdUser = await prisma.user.create({
         data: {
           ...userData,
+          email: userData.email.toLowerCase(),
           password: passwordHash,
         },
       })
@@ -31,6 +32,7 @@ class UserService {
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
+    email = email.toLowerCase()
     try {
       const user = await prisma.user.findUnique({
         where: { email },
