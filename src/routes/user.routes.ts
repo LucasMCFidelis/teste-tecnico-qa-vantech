@@ -1,11 +1,16 @@
 import type { FastifyInstance } from 'fastify'
 import { swaggerTags } from '../utils/swagger.tags.js'
 import type { GetUserParams } from '../schemas/user.schema.js'
-import { createdUserResponseSchema, createUserSchema } from '../schemas/user.schema.js'
+import {
+  createdUserResponseSchema,
+  createUserSchema,
+  getUserSchema,
+} from '../schemas/user.schema.js'
 import { userController } from '../controller/user.controller.js'
 import { errorResponseSchema } from '../schemas/error.schema.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { ownerAuthorizationMiddleware } from '../middlewares/authorize-user.middleware.js'
+import { validationMiddleware } from '../middlewares/validation.middleware.js'
 
 export default async function userRoutes(app: FastifyInstance) {
   app.post('/', {
@@ -36,6 +41,8 @@ export default async function userRoutes(app: FastifyInstance) {
 
       description: 'Retorna usuário de acordo com o id',
 
+      params: getUserSchema,
+
       response: {
         200: createdUserResponseSchema,
         400: errorResponseSchema('Parâmetro "id" inválido'),
@@ -46,7 +53,7 @@ export default async function userRoutes(app: FastifyInstance) {
       },
     },
     attachValidation: true,
-    preHandler: [authMiddleware, ownerAuthorizationMiddleware],
+    preHandler: [validationMiddleware, authMiddleware, ownerAuthorizationMiddleware],
     handler: userController.getUser.bind(userController),
   })
 }

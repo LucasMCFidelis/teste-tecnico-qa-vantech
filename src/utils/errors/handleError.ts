@@ -8,6 +8,10 @@ export function handleError(reply: FastifyReply, err: unknown) {
     return sendError(reply, err.issues[0]?.message ?? 'Erro de validação.', 400)
   }
 
+  if (err instanceof Error && 'validation' in err && Array.isArray(err.validation)) {
+    return sendError(reply, err.validation[0]?.message ?? 'Erro de validação.', 400)
+  }
+
   if (err instanceof HttpError) {
     return sendError(reply, err.message, err.statusCode)
   }
