@@ -33,5 +33,15 @@ export const createdUserResponseSchema = z
     },
   })
 
+export const getUserSchema = z.object({
+  id: z.coerce
+    .number({
+      error: 'O parâmetro id deve ser um número.',
+    })
+    .int('O parâmetro id deve ser um número inteiro.')
+    .positive('O parâmetro id deve ser maior que zero.'),
+})
+
 export type CreateUserInput = z.infer<typeof createUserSchema>
 export type CreatedUserResponse = z.infer<typeof createdUserResponseSchema>
+export type GetUserParams = z.infer<typeof getUserSchema>

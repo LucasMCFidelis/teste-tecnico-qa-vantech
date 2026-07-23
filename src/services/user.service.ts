@@ -2,7 +2,8 @@ import type { User } from '../generated/prisma/client.js'
 import { prisma } from '../lib/prisma.js'
 import type { CreatedUserResponse } from '../schemas/user.schema.js'
 import { createUserSchema, type CreateUserInput } from '../schemas/user.schema.js'
-import { ConflictError, InternalServerError } from '../utils/errors/httpErrors.js'
+import { toUserResponse } from '../tests/utils/to-user-response.js'
+import { ConflictError, InternalServerError, NotFoundError } from '../utils/errors/httpErrors.js'
 import { hashPassword } from '../utils/security/password.js'
 
 class UserService {
@@ -22,12 +23,7 @@ class UserService {
           password: passwordHash,
         },
       })
-      return {
-        id: createdUser.id,
-        name: createdUser.name,
-        email: createdUser.email,
-        createdAt: createdUser.createdAt.toISOString(),
-      }
+      return toUserResponse(createdUser)
     } catch (error) {
       console.error('Error creating user:', error)
       throw new InternalServerError('Erro interno ao criar usuário no banco de dados')
@@ -44,6 +40,24 @@ class UserService {
       console.error('Error to find user:', error)
       throw new InternalServerError('Erro interno ao buscar usuário no banco de dados por e-mail')
     }
+  }
+
+  async getUserById(id: number): Promise<User | null> {
+    let user
+    try {
+      user = await prisma.user.findUnique({
+        where: { id },
+      })
+    } catch (error) {
+      console.error('Error to find user:', error)
+      throw new InternalServerError('Erro interno ao buscar usuário no banco de dados por id')
+    }
+
+    if (!user) {
+      throw new NotFoundError('Usuário não encontrado')
+    }
+
+    return user
   }
 }
 

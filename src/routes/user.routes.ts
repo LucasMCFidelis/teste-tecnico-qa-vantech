@@ -1,8 +1,10 @@
 import type { FastifyInstance } from 'fastify'
 import { swaggerTags } from '../utils/swagger.tags.js'
+import type { GetUserParams } from '../schemas/user.schema.js'
 import { createdUserResponseSchema, createUserSchema } from '../schemas/user.schema.js'
 import { userController } from '../controller/user.controller.js'
 import { errorResponseSchema } from '../schemas/error.schema.js'
+import { authMiddleware } from '../middlewares/auth.middleware.js'
 
 export default async function userRoutes(app: FastifyInstance) {
   app.post('/', {
@@ -24,5 +26,25 @@ export default async function userRoutes(app: FastifyInstance) {
     },
     attachValidation: true,
     handler: userController.createUser.bind(userController),
+  })
+  app.get<{ Params: GetUserParams }>('/:id', {
+    schema: {
+      tags: [swaggerTags.user.name],
+
+      summary: 'Busca usuário por id',
+
+      description: 'Retorna usuário de acordo com o id',
+
+      response: {
+        200: createdUserResponseSchema,
+        400: errorResponseSchema('Parâmetro "id" inválido'),
+        401: errorResponseSchema('Token inválido ou não informado'),
+        404: errorResponseSchema('Usuário não encontrado'),
+        500: errorResponseSchema('Erro interno do servidor'),
+      },
+    },
+    attachValidation: true,
+    preHandler: authMiddleware,
+    handler: userController.getUser.bind(userController),
   })
 }
