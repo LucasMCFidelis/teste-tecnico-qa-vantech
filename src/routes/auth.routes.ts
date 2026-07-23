@@ -1,11 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import { swaggerTags } from '../utils/swagger.tags.js'
 import { errorResponseSchema } from '../schemas/error.schema.js'
+import type { LoginUserInput } from '../schemas/auth.schema.js'
 import { loggedUserResponseSchema, loginUserSchema } from '../schemas/auth.schema.js'
 import { authController } from '../controller/auth.controller.js'
+import { validationMiddleware } from '../middlewares/validation.middleware.js'
 
 export default async function authRoutes(app: FastifyInstance) {
-  app.post('/login', {
+  app.post<{ Body: LoginUserInput }>('/login', {
     schema: {
       tags: [swaggerTags.auth.name],
 
@@ -24,6 +26,7 @@ export default async function authRoutes(app: FastifyInstance) {
       },
     },
     attachValidation: true,
+    preHandler: validationMiddleware,
     handler: authController.loginUser.bind(authController),
   })
 }

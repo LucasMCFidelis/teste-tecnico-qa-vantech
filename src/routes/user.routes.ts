@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { swaggerTags } from '../utils/swagger.tags.js'
-import type { GetUserParams } from '../schemas/user.schema.js'
+import type { GetUserParams, CreateUserInput } from '../schemas/user.schema.js'
 import {
   createdUserResponseSchema,
   createUserSchema,
@@ -13,7 +13,7 @@ import { ownerAuthorizationMiddleware } from '../middlewares/authorize-user.midd
 import { validationMiddleware } from '../middlewares/validation.middleware.js'
 
 export default async function userRoutes(app: FastifyInstance) {
-  app.post('/', {
+  app.post<{ Body: CreateUserInput }>('/', {
     schema: {
       tags: [swaggerTags.user.name],
 
@@ -31,6 +31,7 @@ export default async function userRoutes(app: FastifyInstance) {
       },
     },
     attachValidation: true,
+    preHandler: validationMiddleware,
     handler: userController.createUser.bind(userController),
   })
   app.get<{ Params: GetUserParams }>('/:id', {
