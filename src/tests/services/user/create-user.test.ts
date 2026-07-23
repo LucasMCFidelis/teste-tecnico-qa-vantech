@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals'
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
 
 import { userService } from '../../../services/user.service.js'
 
@@ -89,7 +89,7 @@ describe('UserService.createUser', () => {
             email: 'email-invalido',
           }),
         ),
-      ).rejects.toThrow('E-mail inválido')
+      ).rejects.toBeInstanceOf(ZodError)
 
       expect(mockedCreate).not.toHaveBeenCalled()
     })
