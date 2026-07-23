@@ -1183,7 +1183,7 @@
                   "pm.test(\"Deve retornar um erro válido\", () => {\r",
                   "    pm.expect(response).to.have.property(\"error\");\r",
                   "    pm.expect(response.error).to.be.a(\"string\");\r",
-                  "    pm.expect(response.error).to.match(/e-mail inválido/i);\r",
+                  "    pm.expect(response.error).to.match(/deve ser um e-mail valido/i);\r",
                   "});\r",
                   ""
                 ],
