@@ -158,7 +158,7 @@
           "response": []
         },
         {
-          "name": "POST criar usuário sem campo obrigatório",
+          "name": "POST criar usuário sem campo obrigatório (email)",
           "event": [
             {
               "listen": "test",
@@ -177,7 +177,7 @@
                   "pm.test(\"Deve retornar uma mensagem válida\", () => {\r",
                   "    pm.expect(response).to.have.property(\"error\");\r",
                   "    pm.expect(response.error).to.be.a(\"string\");\r",
-                  "    pm.expect(response.error).to.match(/obrigatório/i);\r",
+                  "    pm.expect(response.error).to.match(/e-mail é obrigatório e deve ser um e-mail valido/i);\r",
                   "});\r",
                   ""
                 ],
@@ -1098,7 +1098,7 @@
           "response": []
         },
         {
-          "name": "POST login de usuário sem campo obrigatório",
+          "name": "POST login de usuário sem campo obrigatório (senha)",
           "event": [
             {
               "listen": "test",
@@ -1117,7 +1117,7 @@
                   "pm.test(\"Deve retornar um erro válido\", () => {\r",
                   "    pm.expect(response).to.have.property(\"error\");\r",
                   "    pm.expect(response.error).to.be.a(\"string\");\r",
-                  "    pm.expect(response.error).to.match(/obrigatório/i);\r",
+                  "    pm.expect(response.error).to.match(/Senha é obrigatória/i);\r",
                   "});\r",
                   ""
                 ],
