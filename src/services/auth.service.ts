@@ -34,10 +34,12 @@ class AuthService {
 
     sessionInputSchema.parse({ userId, token, expiresAt })
 
+    const hashedToken = hashToken(token)
+
     try {
       const session = await prisma.session.create({
         data: {
-          token,
+          token: hashedToken,
           userId,
           expiresAt,
         },

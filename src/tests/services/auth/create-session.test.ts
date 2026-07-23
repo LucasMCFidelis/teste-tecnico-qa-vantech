@@ -6,6 +6,7 @@ import { prisma } from '../../../lib/prisma.js'
 import { sessionInputSchema } from '../../../schemas/auth.schema.js'
 import { InternalServerError } from '../../../utils/errors/httpErrors.js'
 import { makePrismaSession } from './auth.fixtures.js'
+import { hashToken } from '../../../utils/security/token.js'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -117,7 +118,7 @@ describe('AuthService.createSession', () => {
       expect(mockedCreate).toHaveBeenCalledWith({
         data: {
           userId: 10,
-          token: 'token-hash',
+          token: hashToken(session.token),
           expiresAt: expect.any(Date),
         },
       })
