@@ -17,6 +17,10 @@ export class UnauthorizedError extends HttpError {
   statusCode = 401
 }
 
+export class ForbiddenError extends HttpError {
+  statusCode = 403
+}
+
 export class NotFoundError extends HttpError {
   statusCode = 404
 }

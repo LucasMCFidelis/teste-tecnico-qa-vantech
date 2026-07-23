@@ -5,6 +5,7 @@ import { createdUserResponseSchema, createUserSchema } from '../schemas/user.sch
 import { userController } from '../controller/user.controller.js'
 import { errorResponseSchema } from '../schemas/error.schema.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
+import { ownerAuthorizationMiddleware } from '../middlewares/authorize-user.middleware.js'
 
 export default async function userRoutes(app: FastifyInstance) {
   app.post('/', {
@@ -39,12 +40,13 @@ export default async function userRoutes(app: FastifyInstance) {
         200: createdUserResponseSchema,
         400: errorResponseSchema('Parâmetro "id" inválido'),
         401: errorResponseSchema('Token inválido ou não informado'),
+        403: errorResponseSchema('A autorização não permite acessar dados de outro usuário'),
         404: errorResponseSchema('Usuário não encontrado'),
         500: errorResponseSchema('Erro interno do servidor'),
       },
     },
     attachValidation: true,
-    preHandler: authMiddleware,
+    preHandler: [authMiddleware, ownerAuthorizationMiddleware],
     handler: userController.getUser.bind(userController),
   })
 }
