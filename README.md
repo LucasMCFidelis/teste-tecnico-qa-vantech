@@ -19,26 +19,26 @@ Além da API funcional, o projeto tem foco em qualidade: tratamento de erros cen
 
 ## Tecnologias
 
-| Categoria           | Ferramenta                                              |
-| -------------------- | -------------------------------------------------------- |
-| Runtime              | Node.js                                                   |
-| Linguagem            | TypeScript                                                |
-| Framework HTTP       | Fastify                                                   |
-| Validação            | Zod (`fastify-type-provider-zod`)                         |
-| ORM                  | Prisma (com driver adapter para `better-sqlite3`)         |
-| Banco de dados       | SQLite3                                                   |
-| Autenticação         | Token opaco (UUID) + hash SHA-256 armazenado como sessão  |
-| Criptografia de senha| bcrypt                                                    |
-| Documentação de API  | Swagger (`@fastify/swagger` + `swagger-ui`)               |
-| Testes unitários     | Jest + ts-jest                                            |
-| Testes de integração | Postman + Newman                                          |
-| CI                   | GitHub Actions                                            |
-| Lint                 | ESLint (flat config) + typescript-eslint                  |
-| Formatação           | Prettier                                                  |
+| Categoria             | Ferramenta                                               |
+| --------------------- | -------------------------------------------------------- |
+| Runtime               | Node.js                                                  |
+| Linguagem             | TypeScript                                               |
+| Framework HTTP        | Fastify                                                  |
+| Validação             | Zod (`fastify-type-provider-zod`)                        |
+| ORM                   | Prisma (com driver adapter para `better-sqlite3`)        |
+| Banco de dados        | SQLite3                                                  |
+| Autenticação          | Token opaco (UUID) + hash SHA-256 armazenado como sessão |
+| Criptografia de senha | bcrypt                                                   |
+| Documentação de API   | Swagger (`@fastify/swagger` + `swagger-ui`)              |
+| Testes unitários      | Jest + ts-jest                                           |
+| Testes de integração  | Postman + Newman                                         |
+| CI                    | GitHub Actions                                           |
+| Lint                  | ESLint (flat config) + typescript-eslint                 |
+| Formatação            | Prettier                                                 |
 
 ## Pré-requisitos
 
-- [Node.js](https://nodejs.org/) 22.13 ou superior
+- [Node.js](https://nodejs.org/) 22 ou superior
 - npm 10 ou superior
 
 ## Instalação
@@ -60,11 +60,11 @@ cp .env.example .env
 ```
 
 | Variável       | Descrição                                  | Padrão          |
-| -------------- | ------------------------------------------- | --------------- |
-| `DATABASE_URL` | Caminho do banco SQLite usado pelo Prisma   | `file:./dev.db` |
-| `HOST`         | Host em que o servidor Fastify vai escutar  | `localhost`     |
-| `PORT`         | Porta do servidor                           | `3333`          |
-| `CORS_ORIGIN`  | Origem permitida pelo CORS                  | `*`             |
+| -------------- | ------------------------------------------ | --------------- |
+| `DATABASE_URL` | Caminho do banco SQLite usado pelo Prisma  | `file:./dev.db` |
+| `HOST`         | Host em que o servidor Fastify vai escutar | `localhost`     |
+| `PORT`         | Porta do servidor                          | `3333`          |
+| `CORS_ORIGIN`  | Origem permitida pelo CORS                 | `*`             |
 
 ## Banco de dados e migrações
 
@@ -128,12 +128,12 @@ A raiz da aplicação (`/`) redireciona automaticamente para essa documentação
 
 ### Endpoints principais
 
-| Método | Rota                  | Descrição                                                        |    Autenticação    |
-| ------ | ---------------------- | ------------------------------------------------------------------ | :-----------------: |
-| GET    | `/api/v1/health`       | Verifica o status da API e a conectividade com o banco de dados    | Não                 |
-| POST   | `/api/v1/users`        | Cadastra um novo usuário (senha criptografada com bcrypt)          | Não                 |
-| GET    | `/api/v1/users/:id`    | Busca um usuário pelo id                                            | Sim (apenas o dono) |
-| POST   | `/api/v1/auth/login`   | Autentica com e-mail/senha e retorna um token de acesso            | Não                 |
+| Método | Rota                 | Descrição                                                       |    Autenticação     |
+| ------ | -------------------- | --------------------------------------------------------------- | :-----------------: |
+| GET    | `/api/v1/health`     | Verifica o status da API e a conectividade com o banco de dados |         Não         |
+| POST   | `/api/v1/users`      | Cadastra um novo usuário (senha criptografada com bcrypt)       |         Não         |
+| GET    | `/api/v1/users/:id`  | Busca um usuário pelo id                                        | Sim (apenas o dono) |
+| POST   | `/api/v1/auth/login` | Autentica com e-mail/senha e retorna um token de acesso         |         Não         |
 
 Rotas protegidas devem enviar o token retornado no login no header:
 
@@ -175,13 +175,23 @@ O relatório de cobertura é gerado na pasta `coverage/` (ignorada pelo Git).
 
 ### Testes de API com Postman/Newman
 
+A collection do Postman pode ser executada localmente utilizando o Newman.
+
+Como o Newman não faz parte das dependências do projeto, instale-o globalmente:
+
+```bash
+npm install -g newman
+```
+
 Com o servidor rodando (`npm run dev` ou `npm start`), execute a coleção do Postman via linha de comando:
 
 ```bash
 npm run test:postman
 ```
 
-Esse comando roda a coleção com o Newman contra o environment de CI e gera um relatório JUnit em `postman/reports/newman-results.xml`.
+Ao final da execução, será gerado um relatório no formato JUnit em:
+`postman/reports/newman-results.xml`.
+Esse relatório também é utilizado pela pipeline de CI para disponibilizar os resultados da execução dos testes como artefato.
 
 ## Integração contínua (CI)
 

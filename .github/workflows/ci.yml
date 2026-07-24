@@ -53,6 +53,7 @@ jobs:
 
       - name: Run Postman tests
         run: |
+          npm install -g newman
           npm run start &
           npx wait-on http://localhost:3333/api/v1/health
 
