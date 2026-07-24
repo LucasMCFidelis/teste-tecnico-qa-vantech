@@ -2,7 +2,11 @@ import type { FastifyInstance } from 'fastify'
 import { swaggerTags } from '../utils/swagger.tags.js'
 import { errorResponseSchema } from '../schemas/error.schema.js'
 import type { LoginUserInput } from '../schemas/auth.schema.js'
-import { loggedUserResponseSchema, loginUserSchema } from '../schemas/auth.schema.js'
+import {
+  loggedUserResponseSchema,
+  loginUserSchema,
+  logoutResponseSchema,
+} from '../schemas/auth.schema.js'
 import { authController } from '../controller/auth.controller.js'
 import { validationMiddleware } from '../middlewares/validation.middleware.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
@@ -38,6 +42,12 @@ export default async function authRoutes(app: FastifyInstance) {
 
       description:
         'Processa o logout do usuário, inválida a sessão e retorna boolean como status da operação',
+
+      response: {
+        200: logoutResponseSchema,
+        401: errorResponseSchema('Token inválido, expirado ou sessão revogada'),
+        500: errorResponseSchema('Erro interno do servidor'),
+      },
     },
     attachValidation: true,
     preHandler: authMiddleware,

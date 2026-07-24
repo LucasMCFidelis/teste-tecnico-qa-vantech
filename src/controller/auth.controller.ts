@@ -21,7 +21,7 @@ class AuthController {
     try {
       const token = req.user.token
       await authService.logout(token)
-      return reply.status(201).send({ success: true })
+      return reply.status(200).send({ success: true })
     } catch (error) {
       handleError(reply, error)
     }

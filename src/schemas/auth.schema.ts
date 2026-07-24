@@ -54,6 +54,12 @@ export const sessionResponseSchema = z
     },
   })
 
+export const logoutResponseSchema = z.object({
+  success: z.boolean().meta({
+    example: true,
+  }),
+})
+
 export type LoginUserInput = z.infer<typeof loginUserSchema>
 export type LoggedUserResponse = z.infer<typeof loggedUserResponseSchema>
 export type SessionInput = z.infer<typeof sessionInputSchema>
