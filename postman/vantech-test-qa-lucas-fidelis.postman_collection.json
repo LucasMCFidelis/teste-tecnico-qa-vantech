@@ -776,6 +776,106 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "GET busca usuário valido após logout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "const loginHelper = pm.collectionVariables.get(\"loginUserHelper\");\r",
+                  "const logoutHelper = pm.collectionVariables.get(\"logoutUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!loginHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!logoutHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "const loginUser = eval(`(${loginHelper})`);\r",
+                  "const logoutUser = eval(`(${logoutHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserId\",\r",
+                  "        createdResponse.responseJson.id\r",
+                  "    );\r",
+                  "\r",
+                  "    loginUser(createdResponse.userCreatedData.email, createdResponse.userCreatedData.password).then((loginData) => {\r",
+                  "        pm.collectionVariables.set(\r",
+                  "            \"loggedUserToken\",\r",
+                  "            loginData.token\r",
+                  "        );\r",
+                  "\r",
+                  "        logoutUser(loginData.token)\r",
+                  "    });\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 401\", () => {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro que a sessão foi revogada\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Essa sessão foi revogada/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{loggedUserToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{createdUserId}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -1228,6 +1328,354 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "POST login usuário valido novamente após logout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "const loginHelper = pm.collectionVariables.get(\"loginUserHelper\");\r",
+                  "const logoutHelper = pm.collectionVariables.get(\"logoutUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!loginHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!logoutHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "const loginUser = eval(`(${loginHelper})`);\r",
+                  "const logoutUser = eval(`(${logoutHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserEmail\",\r",
+                  "        createdResponse.userCreatedData.email\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserPassword\",\r",
+                  "        createdResponse.userCreatedData.password\r",
+                  "    );\r",
+                  "\r",
+                  "    loginUser(createdResponse.userCreatedData.email, createdResponse.userCreatedData.password).then((loginData) => {\r",
+                  "        logoutUser(loginData.token)\r",
+                  "\r",
+                  "        loginUser(createdResponse.userCreatedData.email, createdResponse.userCreatedData.password).then((loginData) => {\r",
+                  "            pm.collectionVariables.set(\r",
+                  "                \"loggedUserToken\",\r",
+                  "                loginData.token\r",
+                  "            );\r",
+                  "        });\r",
+                  "    });\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 201\", () => {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um token válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"token\");\r",
+                  "    pm.expect(response.token).to.be.a(\"string\");\r",
+                  "    pm.expect(response.token).to.not.be.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{createdUserEmail}}\",\r\n    \"password\": \"{{createdUserPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST logout de usuário com sucesso",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "const loginHelper = pm.collectionVariables.get(\"loginUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!loginHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "const loginUser = eval(`(${loginHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    loginUser(createdResponse.userCreatedData.email, createdResponse.userCreatedData.password).then((loginData) => {\r",
+                  "        pm.collectionVariables.set(\r",
+                  "            \"loggedUserToken\",\r",
+                  "            loginData.token\r",
+                  "        );\r",
+                  "    });\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar sucesso\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"success\");\r",
+                  "    pm.expect(response.success).to.be.a(\"boolean\");\r",
+                  "    pm.expect(response.success).to.eql(true);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{loggedUserToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST logout de usuário sem token",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "\r",
+                  "createUser()"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 401\", () => {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Token não informado/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST logout de usuário com token invalido",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "\r",
+                  "createUser().then(() => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"invalidToken\",\r",
+                  "        \"esse-token-nao-e-valido\"\r",
+                  "    );\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 401\", () => {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Token inválido/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{invalidToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }
@@ -1318,7 +1766,7 @@
           "\r",
           "        if (res.code !== 201) {\r",
           "            throw new Error(\r",
-          "                `Login do usuário falhou (${res.code}): ${JSON.stringify(res.json())}`\r",
+          "                `Login do usuário falhou (${res.code})`\r",
           "            );\r",
           "        }\r",
           "\r",
@@ -1332,7 +1780,41 @@
           "        \"loginUserHelper\",\r",
           "        loginUserHelperFn.toString()\r",
           "    );\r",
-          "};"
+          "};\r",
+          "\r",
+          "if (!pm.collectionVariables.get(\"logoutUserHelper\")) {\r",
+          "    const logoutUserHelperFn = async function (token) {\r",
+          "        const res = await new Promise((resolve, reject) => {\r",
+          "            pm.sendRequest({\r",
+          "                url: pm.environment.get(\"baseUrl\") + \"/auth/logout\",\r",
+          "                method: \"POST\",\r",
+          "                header: {\r",
+          "                    \"Authorization\": `Bearer ${token}`\r",
+          "                },\r",
+          "            }, (err, response) => {\r",
+          "                if (err) {\r",
+          "                    reject(err);\r",
+          "                } else {\r",
+          "                    resolve(response);\r",
+          "                }\r",
+          "            });\r",
+          "        });\r",
+          "\r",
+          "        if (res.code !== 200) {\r",
+          "            throw new Error(\r",
+          "                `Logout do usuário falhou (${res.code})`\r",
+          "            );\r",
+          "        }\r",
+          "\r",
+          "        return res.json()\r",
+          "    };\r",
+          "\r",
+          "    pm.collectionVariables.set(\r",
+          "        \"logoutUserHelper\",\r",
+          "        logoutUserHelperFn.toString()\r",
+          "    );\r",
+          "};\r",
+          ""
         ]
       }
     },
@@ -1395,6 +1877,10 @@
     },
     {
       "key": "loginUserHelper",
+      "value": ""
+    },
+    {
+      "key": "logoutUserHelper",
       "value": ""
     }
   ]
