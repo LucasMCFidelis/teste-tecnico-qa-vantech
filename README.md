@@ -38,7 +38,7 @@ Além da API funcional, o projeto tem foco em qualidade: tratamento de erros cen
 
 ## Pré-requisitos
 
-- [Node.js](https://nodejs.org/) 22 ou superior
+- [Node.js](https://nodejs.org/) 22 LTS (versão 22.13.0 ou superior)
 - npm 10 ou superior
 
 ## Instalação

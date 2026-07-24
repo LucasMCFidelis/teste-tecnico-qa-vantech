@@ -4,7 +4,7 @@
   "description": "Teste técnico realizado para vaga de Analista de teste na Vantech",
   "main": "dist/index.js",
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=22.13.0",
     "npm": ">=10.0.0"
   },
   "scripts": {
