@@ -19,6 +19,7 @@ export function makePrismaSession(override: Partial<Session> = {}): Session {
     token: 'token-hash',
     createdAt: new Date(),
     expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    revokedAt: null,
     ...override,
   }
 }
@@ -30,6 +31,7 @@ export function makeSessionResponse(override: Partial<SessionResponse> = {}): Se
     token: 'token-test',
     createdAt: new Date('2026-07-22T10:00:00Z').toISOString(),
     expiresAt: new Date('2026-07-22T11:00:00Z').toISOString(),
+    revokedAt: null,
     ...override,
   }
 }

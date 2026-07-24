@@ -16,6 +16,16 @@ class AuthController {
       handleError(reply, error)
     }
   }
+
+  async logoutUser(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const token = req.user.token
+      await authService.logout(token)
+      return reply.status(201).send({ success: true })
+    } catch (error) {
+      handleError(reply, error)
+    }
+  }
 }
 
 export const authController = new AuthController()

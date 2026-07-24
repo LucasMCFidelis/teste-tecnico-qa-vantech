@@ -42,6 +42,7 @@ export const sessionResponseSchema = z
     token: z.string(),
     createdAt: z.iso.datetime(),
     expiresAt: z.iso.datetime(),
+    revokedAt: z.iso.datetime().nullable().optional(),
   })
   .meta({
     example: {

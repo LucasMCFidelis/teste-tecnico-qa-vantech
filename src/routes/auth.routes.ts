@@ -5,6 +5,7 @@ import type { LoginUserInput } from '../schemas/auth.schema.js'
 import { loggedUserResponseSchema, loginUserSchema } from '../schemas/auth.schema.js'
 import { authController } from '../controller/auth.controller.js'
 import { validationMiddleware } from '../middlewares/validation.middleware.js'
+import { authMiddleware } from '../middlewares/auth.middleware.js'
 
 export default async function authRoutes(app: FastifyInstance) {
   app.post<{ Body: LoginUserInput }>('/login', {
@@ -28,5 +29,18 @@ export default async function authRoutes(app: FastifyInstance) {
     attachValidation: true,
     preHandler: validationMiddleware,
     handler: authController.loginUser.bind(authController),
+  })
+  app.post('/logout', {
+    schema: {
+      tags: [swaggerTags.auth.name],
+
+      summary: 'Realiza processo de logout para o usuário',
+
+      description:
+        'Processa o logout do usuário, inválida a sessão e retorna boolean como status da operação',
+    },
+    attachValidation: true,
+    preHandler: authMiddleware,
+    handler: authController.logoutUser.bind(authController),
   })
 }
