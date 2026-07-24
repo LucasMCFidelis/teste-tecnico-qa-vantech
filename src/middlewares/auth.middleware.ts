@@ -22,6 +22,7 @@ export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
     if (session) {
       req.user = {
         id: session.userId,
+        token,
       }
     }
   } catch (error) {

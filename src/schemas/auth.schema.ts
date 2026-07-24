@@ -42,6 +42,7 @@ export const sessionResponseSchema = z
     token: z.string(),
     createdAt: z.iso.datetime(),
     expiresAt: z.iso.datetime(),
+    revokedAt: z.iso.datetime().nullable().optional(),
   })
   .meta({
     example: {
@@ -52,6 +53,12 @@ export const sessionResponseSchema = z
       expiresAt: new Date().toISOString(),
     },
   })
+
+export const logoutResponseSchema = z.object({
+  success: z.boolean().meta({
+    example: true,
+  }),
+})
 
 export type LoginUserInput = z.infer<typeof loginUserSchema>
 export type LoggedUserResponse = z.infer<typeof loggedUserResponseSchema>

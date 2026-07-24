@@ -15,6 +15,7 @@ import {
 import { userService } from './user.service.js'
 import { generateToken, hashToken } from '../utils/security/token.js'
 import { comparePasswords } from '../utils/security/password.js'
+import type { Session } from '../generated/prisma/client.js'
 
 class AuthService {
   private getNewExpiresAtDate(): Date {
@@ -22,10 +23,53 @@ class AuthService {
     return new Date(Date.now() + DEFAULT_SESSION_TIME_MILLISECONDS)
   }
 
-  private checkSessionIsValide(expiresAt: Date): void {
+  private checkSessionIsValide({
+    expiresAt,
+    revokedAt,
+  }: {
+    expiresAt: Date
+    revokedAt?: Date | null
+  }): void {
     if (!expiresAt) return
+    if (revokedAt) {
+      throw new UnauthorizedError('Essa sessão foi revogada')
+    }
     if (new Date() > expiresAt) {
       throw new GoneError('Essa sessão não está mais disponível. Realize login novamente')
+    }
+  }
+
+  async getSessionByToken(token: string): Promise<Session> {
+    const hashedToken = hashToken(token)
+
+    let session
+    try {
+      session = await prisma.session.findUnique({
+        where: {
+          token: hashedToken,
+        },
+      })
+    } catch (error) {
+      console.error('Error to get session:', error)
+      throw new InternalServerError('Erro interno ao buscar sessão no banco de dados')
+    }
+
+    if (!session) {
+      throw new UnauthorizedError('Token inválido')
+    }
+
+    return session
+  }
+
+  async invalidateSession(sessionId: number): Promise<void> {
+    try {
+      await prisma.session.update({
+        where: { id: sessionId },
+        data: { revokedAt: new Date() },
+      })
+    } catch (error) {
+      console.error('Error to invalidate session:', error)
+      throw new InternalServerError('Erro interno ao invalidar sessão no banco de dados')
     }
   }
 
@@ -78,19 +122,8 @@ class AuthService {
   }
 
   async validateToken(token: string): Promise<SessionResponse | null> {
-    const hashedToken = hashToken(token)
-
-    const session = await prisma.session.findUnique({
-      where: {
-        token: hashedToken,
-      },
-    })
-
-    if (!session) {
-      throw new UnauthorizedError('Token inválido')
-    }
-
-    this.checkSessionIsValide(session.expiresAt)
+    const session = await this.getSessionByToken(token)
+    this.checkSessionIsValide({ expiresAt: session.expiresAt, revokedAt: session.revokedAt })
 
     return {
       id: session.id,
@@ -99,6 +132,12 @@ class AuthService {
       createdAt: session.createdAt.toISOString(),
       expiresAt: session.expiresAt.toISOString(),
     }
+  }
+
+  async logout(token: string): Promise<void> {
+    const session = await this.getSessionByToken(token)
+
+    await this.invalidateSession(session.id)
   }
 }
 
