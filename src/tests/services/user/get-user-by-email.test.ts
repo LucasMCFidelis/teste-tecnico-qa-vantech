@@ -2,7 +2,7 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 
 import { userService } from '../../../services/user.service.js'
 import type { User } from '../../../generated/prisma/client.js'
-import { InternalServerError } from '../../../utils/errors/httpErrors.js'
+import { InternalServerError } from '../../../utils/errors/http-errors.js'
 import { makeUser } from './user.fixtures.js'
 import { prisma } from '../../../lib/prisma.js'
 

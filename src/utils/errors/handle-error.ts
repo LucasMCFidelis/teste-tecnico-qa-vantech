@@ -1,6 +1,6 @@
 import type { FastifyReply } from 'fastify'
 import { sendError } from '../../routes/helpers.js'
-import { HttpError } from './httpErrors.js'
+import { HttpError } from './http-errors.js'
 import { ZodError } from 'zod'
 
 export function handleError(reply: FastifyReply, err: unknown) {

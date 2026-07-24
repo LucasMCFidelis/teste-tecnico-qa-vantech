@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { handleError } from '../utils/errors/handleError.js'
+import { handleError } from '../utils/errors/handle-error.js'
 import type { LoginUserInput } from '../schemas/auth.schema.js'
 import { authService } from '../services/auth.service.js'
 

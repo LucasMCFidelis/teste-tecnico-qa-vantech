@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { authService } from '../services/auth.service.js'
-import { UnauthorizedError } from '../utils/errors/httpErrors.js'
-import { handleError } from '../utils/errors/handleError.js'
+import { UnauthorizedError } from '../utils/errors/http-errors.js'
+import { handleError } from '../utils/errors/handle-error.js'
 
 export async function authMiddleware(req: FastifyRequest, reply: FastifyReply) {
   try {

@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { ForbiddenError } from '../utils/errors/httpErrors.js'
-import { handleError } from '../utils/errors/handleError.js'
+import { ForbiddenError } from '../utils/errors/http-errors.js'
+import { handleError } from '../utils/errors/handle-error.js'
 
 export async function ownerAuthorizationMiddleware(req: FastifyRequest, reply: FastifyReply) {
   try {
