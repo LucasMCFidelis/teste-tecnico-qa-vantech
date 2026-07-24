@@ -62,4 +62,14 @@ describe('AuthService.validateToken', () => {
 
     await expect(authService.validateToken('token')).rejects.toThrow(GoneError)
   })
+
+  it('deve lançar UnauthorizedError quando o token tiver sido revogado', async () => {
+    mockedFindUnique.mockResolvedValue(
+      makePrismaSession({
+        revokedAt: new Date(),
+      }),
+    )
+
+    await expect(authService.validateToken('token')).rejects.toThrow(UnauthorizedError)
+  })
 })
