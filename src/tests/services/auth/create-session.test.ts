@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { authService } from '../../../services/auth.service.js'
 import { prisma } from '../../../lib/prisma.js'
 import { sessionInputSchema } from '../../../schemas/auth.schema.js'
-import { InternalServerError } from '../../../utils/errors/httpErrors.js'
+import { InternalServerError } from '../../../utils/errors/http-errors.js'
 import { makePrismaSession } from './auth.fixtures.js'
 import { hashToken } from '../../../utils/security/token.js'
 

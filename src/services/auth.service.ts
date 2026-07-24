@@ -11,7 +11,7 @@ import {
   InternalServerError,
   NotFoundError,
   UnauthorizedError,
-} from '../utils/errors/httpErrors.js'
+} from '../utils/errors/http-errors.js'
 import { userService } from './user.service.js'
 import { generateToken, hashToken } from '../utils/security/token.js'
 import { comparePasswords } from '../utils/security/password.js'

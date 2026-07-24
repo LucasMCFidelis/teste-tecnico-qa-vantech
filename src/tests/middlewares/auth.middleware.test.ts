@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { authMiddleware } from '../../middlewares/auth.middleware.js'
 import { authService } from '../../services/auth.service.js'
-import { handleError } from '../../utils/errors/handleError.js'
-import { UnauthorizedError } from '../../utils/errors/httpErrors.js'
+import { handleError } from '../../utils/errors/handle-error.js'
+import { UnauthorizedError } from '../../utils/errors/http-errors.js'
 import { makeSessionResponse } from '../services/auth/auth.fixtures.js'
 
 jest.mock('../../services/auth.service.js', () => ({
@@ -12,7 +12,7 @@ jest.mock('../../services/auth.service.js', () => ({
   },
 }))
 
-jest.mock('../../utils/errors/handleError.js', () => ({
+jest.mock('../../utils/errors/handle-error.js', () => ({
   handleError: jest.fn(),
 }))
 

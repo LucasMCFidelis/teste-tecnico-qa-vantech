@@ -2,9 +2,9 @@ import type { User } from '../generated/prisma/client.js'
 import { prisma } from '../lib/prisma.js'
 import type { CreatedUserResponse } from '../schemas/user.schema.js'
 import { createUserSchema, type CreateUserInput } from '../schemas/user.schema.js'
-import { toUserResponse } from '../tests/utils/to-user-response.js'
-import { ConflictError, InternalServerError, NotFoundError } from '../utils/errors/httpErrors.js'
+import { ConflictError, InternalServerError, NotFoundError } from '../utils/errors/http-errors.js'
 import { hashPassword } from '../utils/security/password.js'
+import { toUserResponse } from '../utils/to-user-response.js'
 
 class UserService {
   async createUser(userData: CreateUserInput): Promise<CreatedUserResponse | void> {

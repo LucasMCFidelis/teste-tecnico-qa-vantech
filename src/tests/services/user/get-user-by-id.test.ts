@@ -2,8 +2,8 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 
 import { userService } from '../../../services/user.service.js'
 import type { User } from '../../../generated/prisma/client.js'
-import { InternalServerError } from '../../../utils/errors/http-errors.js'
-import { makeUser } from './user.fixtures.js'
+import { InternalServerError, NotFoundError } from '../../../utils/errors/http-errors.js'
+import { makePrismaUser } from './user.fixtures.js'
 import { prisma } from '../../../lib/prisma.js'
 
 jest.mock('../../../lib/prisma', () => ({
@@ -18,23 +18,19 @@ const mockedFindUnique = prisma.user.findUnique as jest.MockedFunction<
   typeof prisma.user.findUnique
 >
 
-describe('UserService.getUserByEmail', () => {
-  const email = 'lucas@example.com'
+describe('UserService.getUserById', () => {
+  const id = 1
 
   beforeEach(() => {
     mockedFindUnique.mockReset()
   })
 
-  it('deve buscar o usuário pelo e-mail informado', async () => {
-    const user: User = {
-      id: 1,
-      createdAt: new Date(),
-      ...makeUser({ email }),
-    }
+  it('deve buscar o usuário pelo id informado', async () => {
+    const user: User = makePrismaUser({ id })
 
     mockedFindUnique.mockResolvedValueOnce(user)
 
-    const result = await userService.getUserByEmail(email)
+    const result = await userService.getUserById(id)
 
     expect(result).toEqual(user)
 
@@ -42,21 +38,19 @@ describe('UserService.getUserByEmail', () => {
 
     expect(mockedFindUnique).toHaveBeenCalledWith({
       where: {
-        email,
+        id,
       },
     })
   })
 
-  it('deve retornar null quando o usuário não existir', async () => {
+  it('deve retornar NotFoundError quando o usuário não existir', async () => {
     mockedFindUnique.mockResolvedValueOnce(null)
 
-    const result = await userService.getUserByEmail(email)
-
-    expect(result).toBeNull()
+    await expect(userService.getUserById(id)).rejects.toBeInstanceOf(NotFoundError)
 
     expect(mockedFindUnique).toHaveBeenCalledWith({
       where: {
-        email,
+        id,
       },
     })
   })
@@ -68,7 +62,7 @@ describe('UserService.getUserByEmail', () => {
 
     const consoleSpy = jest.spyOn(console, 'error')
 
-    await expect(userService.getUserByEmail(email)).rejects.toBeInstanceOf(InternalServerError)
+    await expect(userService.getUserById(id)).rejects.toBeInstanceOf(InternalServerError)
 
     expect(consoleSpy).toHaveBeenCalledTimes(1)
 
@@ -78,8 +72,8 @@ describe('UserService.getUserByEmail', () => {
   it('deve lançar InternalServerError com a mensagem correta quando ocorrer erro no banco', async () => {
     mockedFindUnique.mockRejectedValueOnce(new Error('Erro inesperado'))
 
-    await expect(userService.getUserByEmail(email)).rejects.toThrow(
-      'Erro interno ao buscar usuário no banco de dados por e-mail',
+    await expect(userService.getUserById(id)).rejects.toThrow(
+      'Erro interno ao buscar usuário no banco de dados por id',
     )
   })
 })
