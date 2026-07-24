@@ -1,5 +1,5 @@
-import type { User } from '../../generated/prisma/client.js'
-import type { CreatedUserResponse } from '../../schemas/user.schema.js'
+import type { User } from '../generated/prisma/client.js'
+import type { CreatedUserResponse } from '../schemas/user.schema.js'
 
 export function toUserResponse(user: User): CreatedUserResponse {
   return {
