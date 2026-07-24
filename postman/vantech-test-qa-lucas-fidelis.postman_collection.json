@@ -1,0 +1,1401 @@
+{
+  "info": {
+    "_postman_id": "90e0476a-e9a3-4ea1-bda0-260da5e9f894",
+    "name": "vantech-test-qa-lucas-fidelis",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "36785755"
+  },
+  "item": [
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "GET health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"O status da aplicação deve ser 'ok'\", () => {\r",
+                  "    pm.expect(response.status).to.eql(\"ok\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve conter um timestamp válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"timestamp\");\r",
+                  "\r",
+                  "    const timestamp = Date.parse(response.timestamp);\r",
+                  "    pm.expect(timestamp).to.not.be.NaN;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O serviço de banco de dados deve estar operacional\", () => {\r",
+                  "    pm.expect(response.services).to.have.property(\"database\");\r",
+                  "    pm.expect(response.services.database).to.eql(\"ok\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A estrutura da resposta deve estar correta\", () => {\r",
+                  "    pm.expect(response).to.have.all.keys([\r",
+                  "        \"status\",\r",
+                  "        \"timestamp\",\r",
+                  "        \"services\"\r",
+                  "    ]);\r",
+                  "\r",
+                  "    pm.expect(response.services).to.have.all.keys([\r",
+                  "        \"database\"\r",
+                  "    ]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "POST criar usuário com sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 201\", () => {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "const requestData = JSON.parse(pm.request.body.raw);\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um id válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"id\");\r",
+                  "    pm.expect(response.id).to.be.a(\"number\");\r",
+                  "    pm.expect(response.id).to.be.greaterThan(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar informações sensíveis\", () => {\r",
+                  "    pm.expect(response).to.not.have.property(\"password\");\r",
+                  "    pm.expect(response).to.not.have.property(\"senha\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O e-mail retornado deve ser o mesmo informado na requisição\", () => {\r",
+                  "    pm.expect(response.email.toLowerCase())\r",
+                  "        .to.eql(requestData.email.toLowerCase());\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O nome retornado deve ser o mesmo informado na requisição\", () => {\r",
+                  "    pm.expect(response.name).to.eql(requestData.name);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A resposta deve conter apenas os campos esperados\", () => {\r",
+                  "    pm.expect(response).to.have.all.keys([\r",
+                  "        \"id\",\r",
+                  "        \"name\",\r",
+                  "        \"email\",\r",
+                  "        \"createdAt\"\r",
+                  "    ]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST criar usuário sem campo obrigatório (email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 400\", () => {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar uma mensagem válida\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/e-mail é obrigatório e deve ser um e-mail valido/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\r\n    \"password\": \"{{$randomPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST criar usuário com email já cadastrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 409\", () => {\r",
+                  "    pm.response.to.have.status(409);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Não é possível criar um usuário com este e-mail/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const helper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!helper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${helper})`);\r",
+                  "\r",
+                  "createUser().then((data) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"conflictEmail\",\r",
+                  "        data.userCreatedData.email\r",
+                  "    );\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\r\n    \"email\": \"{{conflictEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET busca usuário valido",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "const loginHelper = pm.collectionVariables.get(\"loginUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!loginHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "const loginUser = eval(`(${loginHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserId\",\r",
+                  "        createdResponse.responseJson.id\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserEmail\",\r",
+                  "        createdResponse.userCreatedData.email\r",
+                  "    );\r",
+                  "\r",
+                  "    loginUser(createdResponse.userCreatedData.email, createdResponse.userCreatedData.password).then((loginData) => {\r",
+                  "        pm.collectionVariables.set(\r",
+                  "            \"loggedUserToken\",\r",
+                  "            loginData.token\r",
+                  "        );\r",
+                  "    });\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 200\", () => {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o mesmo id passado como parametro\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"id\");\r",
+                  "    pm.expect(response.id).to.eql(pm.collectionVariables.get(\"createdUserId\"));\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar informações sensíveis\", () => {\r",
+                  "    pm.expect(response).to.not.have.property(\"password\");\r",
+                  "    pm.expect(response).to.not.have.property(\"senha\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O e-mail retornado deve ser o mesmo do usuário logado\", () => {\r",
+                  "    pm.expect(response.email.toLowerCase())\r",
+                  "        .to.eql(pm.collectionVariables.get(\"createdUserEmail\").toLowerCase());\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A resposta deve conter apenas os campos esperados\", () => {\r",
+                  "    pm.expect(response).to.have.all.keys([\r",
+                  "        \"id\",\r",
+                  "        \"name\",\r",
+                  "        \"email\",\r",
+                  "        \"createdAt\"\r",
+                  "    ]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{loggedUserToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{createdUserId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET busca usuário com id invalido",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "const loginHelper = pm.collectionVariables.get(\"loginUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!loginHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "const loginUser = eval(`(${loginHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserId\",\r",
+                  "        createdResponse.responseJson.id\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserEmail\",\r",
+                  "        createdResponse.userCreatedData.email\r",
+                  "    );\r",
+                  "\r",
+                  "    loginUser(createdResponse.userCreatedData.email, createdResponse.userCreatedData.password).then((loginData) => {\r",
+                  "        pm.collectionVariables.set(\r",
+                  "            \"loggedUserToken\",\r",
+                  "            loginData.token\r",
+                  "        );\r",
+                  "    });\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 400\", () => {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/O parâmetro id deve ser um número/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{loggedUserToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/y",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "y"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET busca usuário sem informar token",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserId\",\r",
+                  "        createdResponse.responseJson.id\r",
+                  "    );\r",
+                  "});\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 401\", () => {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Token não informado/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{createdUserId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET busca usuário com token invalido",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponse) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserId\",\r",
+                  "        createdResponse.responseJson.id\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"invalidToken\",\r",
+                  "        \"esse-token-nao-e-valido\"\r",
+                  "    );\r",
+                  "});\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 401\", () => {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Token inválido/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{invalidToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{createdUserId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET buscar dados de outro usuário",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const createHelper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "const loginHelper = pm.collectionVariables.get(\"loginUserHelper\");\r",
+                  "\r",
+                  "if (!createHelper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "if (!loginHelper) {\r",
+                  "    throw new Error(\"loginUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${createHelper})`);\r",
+                  "const loginUser = eval(`(${loginHelper})`);\r",
+                  "\r",
+                  "createUser().then((createdResponseOne) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserIdOne\",\r",
+                  "        createdResponseOne.responseJson.id\r",
+                  "    );\r",
+                  "});\r",
+                  "\r",
+                  "createUser().then((createdResponseTwo) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserIdTwo\",\r",
+                  "        createdResponseTwo.responseJson.id\r",
+                  "    );\r",
+                  "\r",
+                  "    loginUser(createdResponseTwo.userCreatedData.email, createdResponseTwo.userCreatedData.password).then((loginDataUserTwo) => {\r",
+                  "        pm.collectionVariables.set(\r",
+                  "            \"loggedUserTwoToken\",\r",
+                  "            loginDataUserTwo.token\r",
+                  "        );\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 403\", () => {\r",
+                  "    pm.response.to.have.status(403);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/A autorização não permite acessar dados de outro usuário/i);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A resposta não deve conter campos de usuário\", () => {\r",
+                  "    pm.expect(response).to.not.have.property(\"id\");\r",
+                  "    pm.expect(response).to.not.have.property(\"name\");\r",
+                  "    pm.expect(response).to.not.have.property(\"email\");\r",
+                  "    pm.expect(response).to.not.have.property(\"createdAt\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{loggedUserTwoToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{createdUserIdOne}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{createdUserIdOne}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "POST login de usuário com sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 201\", () => {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um token válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"token\");\r",
+                  "    pm.expect(response.token).to.be.a(\"string\");\r",
+                  "    pm.expect(response.token).to.not.be.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const helper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!helper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${helper})`);\r",
+                  "\r",
+                  "createUser().then((data) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserEmail\",\r",
+                  "        data.userCreatedData.email\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserPassword\",\r",
+                  "        data.userCreatedData.password\r",
+                  "    );\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{createdUserEmail}}\",\r\n    \"password\": \"{{createdUserPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST login deve autenticar com email case-insensitive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 201\", () => {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um token válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"token\");\r",
+                  "    pm.expect(response.token).to.be.a(\"string\");\r",
+                  "    pm.expect(response.token).to.not.be.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const helper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!helper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${helper})`);\r",
+                  "\r",
+                  "createUser().then((data) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserEmailLowerCase\",\r",
+                  "        data.userCreatedData.email.toLowerCase()\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserPassword\",\r",
+                  "        data.userCreatedData.password\r",
+                  "    );\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{createdUserEmailLowerCase}}\",\r\n    \"password\": \"{{createdUserPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST login de usuário com credenciais invalidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 401\", () => {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Credenciais inválidas/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const helper = pm.collectionVariables.get(\"createUserHelper\");\r",
+                  "\r",
+                  "if (!helper) {\r",
+                  "    throw new Error(\"createUserHelper não foi inicializado.\");\r",
+                  "}\r",
+                  "\r",
+                  "const createUser = eval(`(${helper})`);\r",
+                  "\r",
+                  "createUser().then((data) => {\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserEmail\",\r",
+                  "        data.userCreatedData.email\r",
+                  "    );\r",
+                  "    pm.collectionVariables.set(\r",
+                  "        \"createdUserPassword\",\r",
+                  "        data.userCreatedData.password\r",
+                  "    );\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{createdUserEmail}}\",\r\n    \"password\": \"senha-incorreta\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST login de usuário não cadastrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 404\", () => {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/usuário não encontrado/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"senha-para-usuario-404\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST login de usuário sem campo obrigatório (senha)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 400\", () => {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/Senha é obrigatória/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{$randomEmail}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST login de usuário com email invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status HTTP 400\", () => {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser inferior a 500ms\", () => {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um erro válido\", () => {\r",
+                  "    pm.expect(response).to.have.property(\"error\");\r",
+                  "    pm.expect(response.error).to.be.a(\"string\");\r",
+                  "    pm.expect(response.error).to.match(/deve ser um e-mail valido/i);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"emailinvalido.com\",\r\n    \"password\": \"senha-valida\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "if (!pm.collectionVariables.get(\"createUserHelper\")) {\r",
+          "    const createUserHelperFn = async function () {\r",
+          "        const bodyData = {\r",
+          "            name: pm.variables.replaceIn(\"{{$randomFullName}}\"),\r",
+          "            email: pm.variables.replaceIn(\"{{$randomEmail}}\"),\r",
+          "            password: pm.variables.replaceIn(\"{{$randomPassword}}\"),\r",
+          "        };\r",
+          "\r",
+          "        const res = await new Promise((resolve, reject) => {\r",
+          "            pm.sendRequest({\r",
+          "                url: pm.environment.get(\"baseUrl\") + \"/users\",\r",
+          "                method: \"POST\",\r",
+          "                header: {\r",
+          "                    \"Content-Type\": \"application/json\"\r",
+          "                },\r",
+          "                body: {\r",
+          "                    mode: \"raw\",\r",
+          "                    raw: JSON.stringify(bodyData)\r",
+          "                }\r",
+          "            }, (err, response) => {\r",
+          "                if (err) {\r",
+          "                    reject(err);\r",
+          "                } else {\r",
+          "                    resolve(response);\r",
+          "                }\r",
+          "            });\r",
+          "        });\r",
+          "\r",
+          "        if (res.code !== 201) {\r",
+          "            throw new Error(`Criação do usuário falhou (${res.code})`);\r",
+          "        }\r",
+          "\r",
+          "        return {\r",
+          "            responseJson: res.json(),\r",
+          "            userCreatedData: bodyData\r",
+          "        };\r",
+          "    };\r",
+          "\r",
+          "    pm.collectionVariables.set(\r",
+          "        \"createUserHelper\",\r",
+          "        createUserHelperFn.toString()\r",
+          "    );\r",
+          "};\r",
+          "\r",
+          "if (!pm.collectionVariables.get(\"loginUserHelper\")) {\r",
+          "    const loginUserHelperFn = async function (email, password) {\r",
+          "        const bodyData = {\r",
+          "            email,\r",
+          "            password\r",
+          "        };\r",
+          "\r",
+          "        const res = await new Promise((resolve, reject) => {\r",
+          "            pm.sendRequest({\r",
+          "                url: pm.environment.get(\"baseUrl\") + \"/auth/login\",\r",
+          "                method: \"POST\",\r",
+          "                header: {\r",
+          "                    \"Content-Type\": \"application/json\"\r",
+          "                },\r",
+          "                body: {\r",
+          "                    mode: \"raw\",\r",
+          "                    raw: JSON.stringify(bodyData),\r",
+          "                    options: {\r",
+          "                        raw: {\r",
+          "                            language: \"json\"\r",
+          "                        }\r",
+          "                    }\r",
+          "                }\r",
+          "            }, (err, response) => {\r",
+          "                if (err) {\r",
+          "                    reject(err);\r",
+          "                } else {\r",
+          "                    resolve(response);\r",
+          "                }\r",
+          "            });\r",
+          "        });\r",
+          "\r",
+          "        if (res.code !== 201) {\r",
+          "            throw new Error(\r",
+          "                `Login do usuário falhou (${res.code}): ${JSON.stringify(res.json())}`\r",
+          "            );\r",
+          "        }\r",
+          "\r",
+          "        return {\r",
+          "            token: res.json().token,\r",
+          "            userLoggedData: bodyData\r",
+          "        };\r",
+          "    };\r",
+          "\r",
+          "    pm.collectionVariables.set(\r",
+          "        \"loginUserHelper\",\r",
+          "        loginUserHelperFn.toString()\r",
+          "    );\r",
+          "};"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "conflictEmail",
+      "value": ""
+    },
+    {
+      "key": "createdUserEmail",
+      "value": ""
+    },
+    {
+      "key": "createdUserPassword",
+      "value": ""
+    },
+    {
+      "key": "createdUserId",
+      "value": ""
+    },
+    {
+      "key": "loggedUserToken",
+      "value": ""
+    },
+    {
+      "key": "invalidToken",
+      "value": ""
+    },
+    {
+      "key": "createdUserIdOne",
+      "value": ""
+    },
+    {
+      "key": "createdUserIdTwo",
+      "value": ""
+    },
+    {
+      "key": "loggedUserTwoToken",
+      "value": ""
+    },
+    {
+      "key": "createdUserEmailLowerCase",
+      "value": ""
+    },
+    {
+      "key": "createUserHelper",
+      "value": ""
+    },
+    {
+      "key": "loginUserHelper",
+      "value": ""
+    }
+  ]
+}
