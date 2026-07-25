@@ -97,7 +97,7 @@ npm run db:studio
 O schema atual (`prisma/schema.prisma`) define duas tabelas:
 
 - **User**: `id`, `name`, `email` (único), `password` (hash), `createdAt`.
-- **Session**: `id`, `userId` (FK para `User`), `token` (hash, único), `createdAt`, `expiresAt`.
+- **Session**: `id`, `userId` (FK para `User`), `token` (hash, único), `createdAt`, `expiresAt`, `revokedAt`.
 
 ## Rodando a aplicação
 
@@ -136,7 +136,7 @@ A raiz da aplicação (`/`) redireciona automaticamente para essa documentação
 | POST   | `/api/v1/auth/login`  | Autentica com e-mail/senha e retorna um token de acesso         |         Não         |
 | POST   | `/api/v1/auth/logout` | Realiza o processo de logout usando o token de acesso           |         Sim         |
 
-Rotas protegidas devem enviar o token retornado no login no header:
+Rotas protegidas devem enviar o token retornado no login como header:
 
 ```
 Authorization: Bearer <token>
@@ -199,7 +199,7 @@ Esse relatório também é utilizado pela pipeline de CI para disponibilizar os 
 O workflow do GitHub Actions (`.github/workflows/ci.yml`) roda em push/PR para `main`, `develop`, `feature/**`, `release/**` e `hotfix/**`, executando em sequência:
 
 1. Instalação de dependências e geração do client do Prisma.
-2. Aplicação das migrações no banco de CI (`npx prisma migrate deploy`).
+2. Aplicação das migrações no banco de CI (`npm run db:migrate:deploy`).
 3. Lint (`npm run lint`).
 4. Build (`npm run build`).
 5. Testes unitários com Jest (`npm test`).
@@ -253,7 +253,6 @@ npm run format
 │   ├── schemas/                 # Schemas Zod de validação e exemplos de payload
 │   ├── services/                # Regras de negócio (criação/busca de usuário, login, sessão)
 │   ├── tests/                   # Testes unitários e de integração (Jest), organizados por camada
-│   │   └── utils/to-user-response.ts      # Helper de mapeamento de entidade para resposta da API
 │   ├── utils/
 │   │   ├── errors/               # Classes de erro HTTP e handler centralizado
 │   │   └── security/             # Hash de senha (bcrypt) e geração/hash de token
@@ -301,4 +300,8 @@ Todas as issues acima estão com status **fechado** (`closed`, label `bug`) e po
 
 ## Autor
 
-Lucas Fidelis
+**Lucas Fidelis**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucas-fidelis-778705149/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=flat&logo=vercel&logoColor=white)](https://portfolio-lucasfidelis.vercel.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/LucasMCFidelis)
