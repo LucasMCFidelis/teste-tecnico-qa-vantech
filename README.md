@@ -269,7 +269,7 @@ npm run format
 
 ## Tratamento de erros
 
-Os erros de negócio são representados por classes específicas em `src/utils/errors/httpErrors.ts` (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `GoneError`, `InternalServerError`), cada uma associada a um status HTTP. O `handleError` centraliza a conversão dessas exceções em respostas JSON padronizadas (`{ "error": "mensagem" }`), além de tratar automaticamente erros de validação do Zod (`ZodError`) e da validação nativa do Fastify — evitando tratamento de erro duplicado em cada controller.
+Os erros de negócio são representados por classes específicas em `src/utils/errors/httpErrors.ts` (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `InternalServerError`), cada uma associada a um status HTTP. O `handleError` centraliza a conversão dessas exceções em respostas JSON padronizadas (`{ "error": "mensagem" }`), além de tratar automaticamente erros de validação do Zod (`ZodError`) e da validação nativa do Fastify — evitando tratamento de erro duplicado em cada controller.
 
 A autorização de recursos (ex.: impedir que um usuário acesse dados de outro) é tratada separadamente pelo `ownerAuthorizationMiddleware`, que lança `ForbiddenError` (`403`) quando o `id` autenticado não corresponde ao `id` solicitado.
 

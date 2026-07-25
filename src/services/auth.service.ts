@@ -7,7 +7,6 @@ import {
   type LoginUserInput,
 } from '../schemas/auth.schema.js'
 import {
-  GoneError,
   InternalServerError,
   NotFoundError,
   UnauthorizedError,
@@ -23,19 +22,19 @@ class AuthService {
     return new Date(Date.now() + DEFAULT_SESSION_TIME_MILLISECONDS)
   }
 
-  private checkSessionIsValide({
+  private checkSessionIsValid({
     expiresAt,
     revokedAt,
   }: {
     expiresAt: Date
     revokedAt?: Date | null
   }): void {
-    if (!expiresAt) return
     if (revokedAt) {
       throw new UnauthorizedError('Essa sessão foi revogada')
     }
+
     if (new Date() > expiresAt) {
-      throw new GoneError('Essa sessão não está mais disponível. Realize login novamente')
+      throw new UnauthorizedError('Essa sessão expirou. Realize login novamente')
     }
   }
 
@@ -123,7 +122,7 @@ class AuthService {
 
   async validateToken(token: string): Promise<SessionResponse | null> {
     const session = await this.getSessionByToken(token)
-    this.checkSessionIsValide({ expiresAt: session.expiresAt, revokedAt: session.revokedAt })
+    this.checkSessionIsValid({ expiresAt: session.expiresAt, revokedAt: session.revokedAt })
 
     return {
       id: session.id,

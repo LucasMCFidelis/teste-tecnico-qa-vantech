@@ -2,7 +2,7 @@ import { describe, it, expect, jest } from '@jest/globals'
 import { authService } from '../../../services/auth.service.js'
 import { prisma } from '../../../lib/prisma.js'
 import { makePrismaSession } from './auth.fixtures.js'
-import { GoneError, UnauthorizedError } from '../../../utils/errors/http-errors.js'
+import { UnauthorizedError } from '../../../utils/errors/http-errors.js'
 
 jest.mock('../../../lib/prisma', () => ({
   prisma: {
@@ -52,7 +52,7 @@ describe('AuthService.validateToken', () => {
     })
   })
 
-  it('deve lançar GoneError quando a sessão estiver expirada', async () => {
+  it('deve lançar UnauthorizedError quando a sessão estiver expirada', async () => {
     mockedFindUnique.mockResolvedValue(
       makePrismaSession({
         createdAt: new Date(),
@@ -60,7 +60,7 @@ describe('AuthService.validateToken', () => {
       }),
     )
 
-    await expect(authService.validateToken('token')).rejects.toThrow(GoneError)
+    await expect(authService.validateToken('token')).rejects.toThrow(UnauthorizedError)
   })
 
   it('deve lançar UnauthorizedError quando o token tiver sido revogado', async () => {
