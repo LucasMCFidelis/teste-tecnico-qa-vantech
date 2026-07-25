@@ -29,10 +29,6 @@ export class ConflictError extends HttpError {
   statusCode = 409
 }
 
-export class GoneError extends HttpError {
-  statusCode = 410
-}
-
 export class InternalServerError extends HttpError {
   statusCode = 500
 }

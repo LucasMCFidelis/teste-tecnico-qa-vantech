@@ -97,6 +97,7 @@ describe('authMiddleware', () => {
 
       expect(request.user).toEqual({
         id: 99,
+        token: 'token-test',
       })
     })
 

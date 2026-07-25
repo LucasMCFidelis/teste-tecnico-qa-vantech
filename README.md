@@ -97,7 +97,7 @@ npm run db:studio
 O schema atual (`prisma/schema.prisma`) define duas tabelas:
 
 - **User**: `id`, `name`, `email` (único), `password` (hash), `createdAt`.
-- **Session**: `id`, `userId` (FK para `User`), `token` (hash, único), `createdAt`, `expiresAt`.
+- **Session**: `id`, `userId` (FK para `User`), `token` (hash, único), `createdAt`, `expiresAt`, `revokedAt`.
 
 ## Rodando a aplicação
 
@@ -128,14 +128,15 @@ A raiz da aplicação (`/`) redireciona automaticamente para essa documentação
 
 ### Endpoints principais
 
-| Método | Rota                 | Descrição                                                       |    Autenticação     |
-| ------ | -------------------- | --------------------------------------------------------------- | :-----------------: |
-| GET    | `/api/v1/health`     | Verifica o status da API e a conectividade com o banco de dados |         Não         |
-| POST   | `/api/v1/users`      | Cadastra um novo usuário (senha criptografada com bcrypt)       |         Não         |
-| GET    | `/api/v1/users/:id`  | Busca um usuário pelo id                                        | Sim (apenas o dono) |
-| POST   | `/api/v1/auth/login` | Autentica com e-mail/senha e retorna um token de acesso         |         Não         |
+| Método | Rota                  | Descrição                                                       |    Autenticação     |
+| ------ | --------------------- | --------------------------------------------------------------- | :-----------------: |
+| GET    | `/api/v1/health`      | Verifica o status da API e a conectividade com o banco de dados |         Não         |
+| POST   | `/api/v1/users`       | Cadastra um novo usuário (senha criptografada com bcrypt)       |         Não         |
+| GET    | `/api/v1/users/:id`   | Busca um usuário pelo id                                        | Sim (apenas o dono) |
+| POST   | `/api/v1/auth/login`  | Autentica com e-mail/senha e retorna um token de acesso         |         Não         |
+| POST   | `/api/v1/auth/logout` | Realiza o processo de logout usando o token de acesso           |         Sim         |
 
-Rotas protegidas devem enviar o token retornado no login no header:
+Rotas protegidas devem enviar o token retornado no login como header:
 
 ```
 Authorization: Bearer <token>
@@ -198,7 +199,7 @@ Esse relatório também é utilizado pela pipeline de CI para disponibilizar os 
 O workflow do GitHub Actions (`.github/workflows/ci.yml`) roda em push/PR para `main`, `develop`, `feature/**`, `release/**` e `hotfix/**`, executando em sequência:
 
 1. Instalação de dependências e geração do client do Prisma.
-2. Aplicação das migrações no banco de CI (`npx prisma migrate deploy`).
+2. Aplicação das migrações no banco de CI (`npm run db:migrate:deploy`).
 3. Lint (`npm run lint`).
 4. Build (`npm run build`).
 5. Testes unitários com Jest (`npm test`).
@@ -252,7 +253,6 @@ npm run format
 │   ├── schemas/                 # Schemas Zod de validação e exemplos de payload
 │   ├── services/                # Regras de negócio (criação/busca de usuário, login, sessão)
 │   ├── tests/                   # Testes unitários e de integração (Jest), organizados por camada
-│   │   └── utils/to-user-response.ts      # Helper de mapeamento de entidade para resposta da API
 │   ├── utils/
 │   │   ├── errors/               # Classes de erro HTTP e handler centralizado
 │   │   └── security/             # Hash de senha (bcrypt) e geração/hash de token
@@ -268,9 +268,23 @@ npm run format
 
 ## Tratamento de erros
 
-Os erros de negócio são representados por classes específicas em `src/utils/errors/httpErrors.ts` (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `GoneError`, `InternalServerError`), cada uma associada a um status HTTP. O `handleError` centraliza a conversão dessas exceções em respostas JSON padronizadas (`{ "error": "mensagem" }`), além de tratar automaticamente erros de validação do Zod (`ZodError`) e da validação nativa do Fastify — evitando tratamento de erro duplicado em cada controller.
+Os erros de negócio são representados por classes específicas em `src/utils/errors/httpErrors.ts` (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `InternalServerError`), cada uma associada a um status HTTP. O `handleError` centraliza a conversão dessas exceções em respostas JSON padronizadas (`{ "error": "mensagem" }`), além de tratar automaticamente erros de validação do Zod (`ZodError`) e da validação nativa do Fastify — evitando tratamento de erro duplicado em cada controller.
 
 A autorização de recursos (ex.: impedir que um usuário acesse dados de outro) é tratada separadamente pelo `ownerAuthorizationMiddleware`, que lança `ForbiddenError` (`403`) quando o `id` autenticado não corresponde ao `id` solicitado.
+
+## Bugs encontrados e corrigidos
+
+Durante o desenvolvimento, os seguintes bugs foram identificados (via testes automatizados e revisão manual) e corrigidos. O histórico completo, com a descrição do problema e da correção aplicada em cada caso, está registrado nas issues fechadas do repositório:
+
+| Issue                                                                     | Descrição                                                       |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [#1](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/1) | Erros de validação retornavam `HTTP 500` em vez de `HTTP 400`   |
+| [#2](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/2) | Login diferenciava letras maiúsculas e minúsculas no e-mail     |
+| [#3](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/3) | Usuário autenticado conseguia acessar dados de outros usuários  |
+| [#4](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/4) | Validação dos parâmetros da rota ocorria depois da autenticação |
+| [#5](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/5) | Mensagens de validação para campos obrigatórios eram genéricas  |
+
+Todas as issues acima estão com status **fechado** (`closed`, label `bug`) e podem ser consultadas em conjunto na [lista de bugs corrigidos](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues?q=is%3Aissue+state%3Aclosed+label%3Abug).
 
 ## Roadmap
 
@@ -286,4 +300,8 @@ A autorização de recursos (ex.: impedir que um usuário acesse dados de outro)
 
 ## Autor
 
-Lucas Fidelis
+**Lucas Fidelis**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucas-fidelis-778705149/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=flat&logo=vercel&logoColor=white)](https://portfolio-lucasfidelis.vercel.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/LucasMCFidelis)
