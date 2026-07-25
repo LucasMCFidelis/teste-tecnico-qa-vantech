@@ -128,12 +128,13 @@ A raiz da aplicação (`/`) redireciona automaticamente para essa documentação
 
 ### Endpoints principais
 
-| Método | Rota                 | Descrição                                                       |    Autenticação     |
-| ------ | -------------------- | --------------------------------------------------------------- | :-----------------: |
-| GET    | `/api/v1/health`     | Verifica o status da API e a conectividade com o banco de dados |         Não         |
-| POST   | `/api/v1/users`      | Cadastra um novo usuário (senha criptografada com bcrypt)       |         Não         |
-| GET    | `/api/v1/users/:id`  | Busca um usuário pelo id                                        | Sim (apenas o dono) |
-| POST   | `/api/v1/auth/login` | Autentica com e-mail/senha e retorna um token de acesso         |         Não         |
+| Método | Rota                  | Descrição                                                       |    Autenticação     |
+| ------ | --------------------- | --------------------------------------------------------------- | :-----------------: |
+| GET    | `/api/v1/health`      | Verifica o status da API e a conectividade com o banco de dados |         Não         |
+| POST   | `/api/v1/users`       | Cadastra um novo usuário (senha criptografada com bcrypt)       |         Não         |
+| GET    | `/api/v1/users/:id`   | Busca um usuário pelo id                                        | Sim (apenas o dono) |
+| POST   | `/api/v1/auth/login`  | Autentica com e-mail/senha e retorna um token de acesso         |         Não         |
+| POST   | `/api/v1/auth/logout` | Realiza o processo de logout usando o token de acesso           |         Sim         |
 
 Rotas protegidas devem enviar o token retornado no login no header:
 
@@ -271,6 +272,20 @@ npm run format
 Os erros de negócio são representados por classes específicas em `src/utils/errors/httpErrors.ts` (`BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `GoneError`, `InternalServerError`), cada uma associada a um status HTTP. O `handleError` centraliza a conversão dessas exceções em respostas JSON padronizadas (`{ "error": "mensagem" }`), além de tratar automaticamente erros de validação do Zod (`ZodError`) e da validação nativa do Fastify — evitando tratamento de erro duplicado em cada controller.
 
 A autorização de recursos (ex.: impedir que um usuário acesse dados de outro) é tratada separadamente pelo `ownerAuthorizationMiddleware`, que lança `ForbiddenError` (`403`) quando o `id` autenticado não corresponde ao `id` solicitado.
+
+## Bugs encontrados e corrigidos
+
+Durante o desenvolvimento, os seguintes bugs foram identificados (via testes automatizados e revisão manual) e corrigidos. O histórico completo, com a descrição do problema e da correção aplicada em cada caso, está registrado nas issues fechadas do repositório:
+
+| Issue                                                                     | Descrição                                                       |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [#1](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/1) | Erros de validação retornavam `HTTP 500` em vez de `HTTP 400`   |
+| [#2](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/2) | Login diferenciava letras maiúsculas e minúsculas no e-mail     |
+| [#3](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/3) | Usuário autenticado conseguia acessar dados de outros usuários  |
+| [#4](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/4) | Validação dos parâmetros da rota ocorria depois da autenticação |
+| [#5](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues/5) | Mensagens de validação para campos obrigatórios eram genéricas  |
+
+Todas as issues acima estão com status **fechado** (`closed`, label `bug`) e podem ser consultadas em conjunto na [lista de bugs corrigidos](https://github.com/LucasMCFidelis/teste-tecnico-qa-vantech/issues?q=is%3Aissue+state%3Aclosed+label%3Abug).
 
 ## Roadmap
 
